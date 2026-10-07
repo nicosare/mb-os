@@ -1428,10 +1428,10 @@ async function sendPhotoToServer(blobFile, roomNum) {
     if (data.ok) {
       return { ok: true };
     } else {
-      return { ok: false, error: data.error };
+      return { ok: false, error: data.error || 'Ошибка сервера' };
     }
   } catch (err) {
-    return { ok: false, error: err.message };
+    return { ok: false, error: 'Сбой сети: ' + err.message };
   }
 }
 
@@ -1442,13 +1442,15 @@ btnSend.addEventListener('click', async () => {
   btnSend.textContent = 'Отправка…';
 
   try {
-    const blob = await encodePreviewBlob();
-    if (!blob) throw new Error('Нет снимка');
+    // Берем готовый blob без повторного кодирования
+    const blob = previewBlob || await previewBlobPromise;
+    if (!blob) throw new Error('Не удалось сформировать файл');
 
     const result = await sendPhotoToServer(blob, selectedRoom.number);
 
     if (!result.ok) throw new Error(result.error);
 
+    // Успешная отправка
     if (queueRemaining > 0) queueRemaining--;
     updateQueueDisplay();
 
@@ -1460,8 +1462,10 @@ btnSend.addEventListener('click', async () => {
       setBusy(btnSend, false);
       resetPhoto();
     }, 500);
+
   } catch (err) {
-    showMessage('Ошибка при отправке: ' + err.message);
+    // Показываем ошибку на 3.5 секунды, чтобы успеть прочитать
+    showMessage('Ошибка отправки: ' + err.message, 3500);
     btnSend.textContent = 'Отправить';
     setBusy(btnSend, false);
   }
