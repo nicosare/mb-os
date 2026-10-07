@@ -9,12 +9,12 @@
   :root {
     --accent: #2688eb;
     --yellow: #ffcc00;
-    --yellow-bg: rgba(255, 204, 0, 0.15);
+    --yellow-bg: rgba(255, 204, 0, 0.12);
     --danger: #ff5a5f;
     --bg-dark: #000000;
-    --card-bg: rgba(255, 255, 255, 0.07);
-    --card-border: rgba(255, 255, 255, 0.12);
-    --text-dim: rgba(255, 255, 255, 0.55);
+    --card-bg: rgba(255, 255, 255, 0.06);
+    --card-border: rgba(255, 255, 255, 0.10);
+    --text-dim: rgba(255, 255, 255, 0.45);
     --page-pad: 16px;
   }
 
@@ -53,6 +53,7 @@
     height: 100dvh;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     overflow: hidden;
     background: #000;
   }
@@ -60,36 +61,31 @@
   /* Header */
   .top-bar {
     position: relative;
-    z-index: 20;
+    z-index: 10;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: calc(env(safe-area-inset-top) + 8px) 16px 8px;
+    padding: calc(env(safe-area-inset-top) + 10px) 18px 10px;
     background: #000;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   }
 
   .hotel-title {
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 12px;
+    font-weight: 700;
     color: var(--text-dim);
-    letter-spacing: 0.5px;
+    letter-spacing: 0.8px;
     text-transform: uppercase;
   }
 
   .room-badge {
-    min-width: 80px;
-    padding: 6px 14px;
-    border: 1px solid var(--yellow);
+    padding: 5px 12px;
+    border: 1px solid rgba(255, 204, 0, 0.4);
     border-radius: 999px;
     background: var(--yellow-bg);
     color: var(--yellow);
-    font-size: 15px;
-    line-height: 18px;
+    font-size: 14px;
     font-weight: 800;
-    text-align: center;
     letter-spacing: 0.3px;
-    box-shadow: 0 2px 12px rgba(255, 204, 0, 0.15);
   }
 
   /* Main View Area */
@@ -99,23 +95,21 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: 10px var(--page-pad);
+    padding: 0 var(--page-pad);
     gap: 12px;
+    min-height: 0;
   }
 
-  /* Viewfinder (Smaller Camera Window) */
+  /* Viewfinder */
   .viewport-container {
     position: relative;
     width: 100%;
     max-width: 420px;
-    height: min(36vh, 280px);
-    border-radius: 20px;
+    height: min(38vh, 290px);
+    border-radius: 18px;
     overflow: hidden;
     background: #0b0b0d;
     border: 1px solid var(--card-border);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
     flex-shrink: 0;
   }
 
@@ -144,14 +138,8 @@
     transition: opacity .2s ease;
   }
 
-  #camera.ready {
-    opacity: 1;
-  }
-
-  #photo {
-    z-index: 2;
-    object-fit: contain;
-  }
+  #camera.ready { opacity: 1; }
+  #photo { z-index: 2; object-fit: contain; }
 
   .camera-overlay {
     position: absolute;
@@ -162,9 +150,9 @@
 
   .focus-corner {
     position: absolute;
-    width: 18px;
-    height: 18px;
-    border-color: rgba(255,255,255,.75);
+    width: 16px;
+    height: 16px;
+    border-color: rgba(255,255,255,.6);
     border-style: solid;
     border-width: 0;
   }
@@ -188,14 +176,11 @@
     color: rgba(255,255,255,.65);
     font-size: 13px;
     text-align: center;
-    transition: opacity .2s ease;
   }
 
-  .camera-loader.error { color: rgba(255,255,255,.82); }
-
   .loader-spinner {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
     border: 3px solid rgba(255,255,255,.11);
     border-top-color: var(--accent);
     border-radius: 50%;
@@ -203,7 +188,7 @@
   }
 
   .loader-title { font-weight: 700; color: #fff; }
-  .loader-subtitle { max-width: 260px; line-height: 16px; color: rgba(255,255,255,.52); font-size: 12px; }
+  .loader-subtitle { max-width: 260px; line-height: 16px; color: rgba(255,255,255,.5); font-size: 12px; }
 
   .loader-retry {
     margin-top: 4px;
@@ -217,177 +202,17 @@
     cursor: pointer;
   }
 
-  /* Controls Section (Shutter button higher up) */
-  .controls-section {
-    width: 100%;
-    max-width: 420px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    flex-shrink: 0;
-  }
-
-  /* Actions Bar / Shutter Buttons */
-  .shutter-grid {
-    width: 100%;
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-    padding: 0 4px;
-  }
-
-  .grid-left { justify-self: start; }
-  .grid-center { justify-self: center; }
-  .grid-right { justify-self: end; }
-
-  .btn-side {
-    min-height: 38px;
-    padding: 8px 12px;
-    border: 1px solid var(--card-border);
-    border-radius: 12px;
-    background: var(--card-bg);
-    color: #fff;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: background .15s ease, transform .1s ease;
-  }
-
-  .btn-side:active, .btn-send:active, .loader-retry:active, .btn-drawer-trigger:active {
-    transform: scale(.96);
-  }
-
-  .btn-side.danger {
-    background: rgba(255, 90, 95, 0.12);
-    border-color: rgba(255, 90, 95, 0.3);
-    color: var(--danger);
-  }
-
-  #captureBtn {
-    position: relative;
-    width: 66px;
-    height: 66px;
-    display: grid;
-    place-items: center;
-    padding: 0;
-    border: 3px solid #fff;
-    border-radius: 50%;
-    background: transparent;
-    cursor: pointer;
-    transition: transform .12s ease, opacity .15s ease;
-    box-shadow: 0 0 16px rgba(255, 255, 255, 0.2);
-  }
-
-  #captureBtn::after {
-    content: "";
-    position: absolute;
-    inset: 5px;
-    border-radius: 50%;
-    background: #fff;
-  }
-
-  #captureBtn:active { transform: scale(.92); }
-  #captureBtn.busy { pointer-events: none; opacity: .45; }
-
-  .btn-send {
-    min-height: 40px;
-    padding: 8px 16px;
-    border: 0;
-    border-radius: 12px;
-    background: var(--accent);
-    color: #fff;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    box-shadow: 0 4px 14px rgba(38,136,235,.30);
-    transition: transform .12s ease, opacity .15s ease;
-  }
-
-  .btn-send.busy { opacity: .58; pointer-events: none; }
-
-  /* Room Carousel */
-  .carousel-wrap {
-    width: 100%;
-    position: relative;
-    transition: opacity .18s ease;
-  }
-
-  .carousel-wrap.disabled {
-    opacity: .32;
-    pointer-events: none;
-  }
-
-  .carousel-fade {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    z-index: 2;
-    width: 36px;
-    pointer-events: none;
-  }
-
-  .carousel-fade.left { left: 0; background: linear-gradient(90deg, #000 0%, rgba(0,0,0,0) 100%); }
-  .carousel-fade.right { right: 0; background: linear-gradient(270deg, #000 0%, rgba(0,0,0,0) 100%); }
-
-  .carousel {
-    width: 100%;
-    height: 42px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding: 0 calc(50% - 32px);
-    scrollbar-width: none;
-    scroll-snap-type: x mandatory;
-    overscroll-behavior-x: contain;
-    touch-action: pan-x;
-  }
-
-  .carousel::-webkit-scrollbar { display: none; }
-
-  .num-item {
-    flex: 0 0 64px;
-    width: 64px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    scroll-snap-align: center;
-    color: rgba(255,255,255,.38);
-    font-size: 15px;
-    font-weight: 600;
-    user-select: none;
-    cursor: pointer;
-    border-radius: 10px;
-    transition: color .12s ease, transform .12s ease, background .12s ease;
-  }
-
-  .num-item.near { color: rgba(255,255,255,.7); }
-
-  .num-item.active {
-    color: var(--yellow);
-    background: var(--yellow-bg);
-    border: 1px solid rgba(255, 204, 0, 0.3);
-    font-size: 18px;
-    font-weight: 800;
-    transform: scale(1.05);
-  }
-
-  /* Description Box reserved for future info */
+  /* Description Card Under Camera */
   .room-description-box {
     width: 100%;
     max-width: 420px;
-    padding: 12px 16px;
-    border-radius: 14px;
+    padding: 10px 14px;
+    border-radius: 12px;
     background: var(--card-bg);
-    border: 1px dashed var(--card-border);
+    border: 1px solid var(--card-border);
     display: flex;
     flex-direction: column;
     gap: 4px;
-    text-align: left;
     flex-shrink: 0;
   }
 
@@ -407,57 +232,175 @@
     font-size: 11px;
     padding: 2px 8px;
     border-radius: 6px;
-    font-weight: 600;
-    background: rgba(255,255,255,0.1);
-    color: rgba(255,255,255,0.8);
+    font-weight: 700;
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 0.3px;
   }
 
   .desc-tag.suite {
     background: rgba(255,204,0,0.15);
     color: var(--yellow);
-    border: 1px solid rgba(255,204,0,0.3);
+    border: 1px solid rgba(255,204,0,0.25);
   }
 
   .desc-body {
     font-size: 12px;
-    line-height: 16px;
+    line-height: 15px;
     color: var(--text-dim);
   }
 
-  /* Footer Button to open Bottom Sheet */
-  .bottom-bar {
-    position: relative;
-    z-index: 20;
-    padding: 8px var(--page-pad) calc(env(safe-area-inset-bottom) + 12px);
-    background: #000;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    display: flex;
-    justify-content: center;
-  }
-
-  .btn-drawer-trigger {
+  /* Carousel Section (Clean Typography) */
+  .carousel-wrap {
     width: 100%;
     max-width: 420px;
-    padding: 12px 18px;
+    position: relative;
+    margin-top: 4px;
+    flex-shrink: 0;
+  }
+
+  .carousel-wrap.disabled {
+    opacity: .3;
+    pointer-events: none;
+  }
+
+  .carousel-fade {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 2;
+    width: 48px;
+    pointer-events: none;
+  }
+
+  .carousel-fade.left { left: 0; background: linear-gradient(90deg, #000 0%, rgba(0,0,0,0) 100%); }
+  .carousel-fade.right { right: 0; background: linear-gradient(270deg, #000 0%, rgba(0,0,0,0) 100%); }
+
+  .carousel {
+    width: 100%;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0 calc(50% - 36px);
+    scrollbar-width: none;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x;
+  }
+
+  .carousel::-webkit-scrollbar { display: none; }
+
+  .num-item {
+    flex: 0 0 72px;
+    width: 72px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    scroll-snap-align: center;
+    color: rgba(255,255,255,.32);
+    font-size: 16px;
+    font-weight: 600;
+    background: transparent;
+    border: none;
+    user-select: none;
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+
+  .num-item.active {
+    color: var(--yellow);
+    font-size: 24px;
+    font-weight: 800;
+    transform: scale(1.15);
+    text-shadow: 0 0 12px rgba(255, 204, 0, 0.3);
+  }
+
+  /* Bottom Controls Area (Camera Shutter at Bottom) */
+  .bottom-controls-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: calc(env(safe-area-inset-bottom) + 54px); /* Space above bottom drawer handle */
+  }
+
+  .shutter-grid {
+    width: 100%;
+    max-width: 420px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 0 16px;
+  }
+
+  .grid-left { justify-self: start; }
+  .grid-center { justify-self: center; }
+  .grid-right { justify-self: end; }
+
+  .btn-side {
+    min-height: 38px;
+    padding: 8px 14px;
     border: 1px solid var(--card-border);
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    background: var(--card-bg);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform .1s ease, background .15s ease;
+  }
+
+  .btn-side:active, .btn-send:active { transform: scale(.95); }
+
+  .btn-side.danger {
+    background: rgba(255, 90, 95, 0.12);
+    border-color: rgba(255, 90, 95, 0.3);
+    color: var(--danger);
+  }
+
+  #captureBtn {
+    position: relative;
+    width: 70px;
+    height: 70px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 4px solid #fff;
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+    transition: transform .12s ease;
+  }
+
+  #captureBtn::after {
+    content: "";
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
+    background: #fff;
+  }
+
+  #captureBtn:active { transform: scale(.91); }
+  #captureBtn.busy { opacity: .45; pointer-events: none; }
+
+  .btn-send {
+    min-height: 40px;
+    padding: 8px 18px;
+    border: 0;
+    border-radius: 12px;
+    background: var(--accent);
     color: #fff;
     font-size: 14px;
     font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 14px rgba(38,136,235,.30);
   }
 
-  .btn-drawer-trigger .trigger-icon {
-    font-size: 16px;
-    color: var(--yellow);
-  }
-
-  /* ---------- Bottom Sheet Modal / Drawer ---------- */
+  /* ---------- Draggable Bottom Sheet Drawer ---------- */
   .sheet-overlay {
     position: fixed;
     inset: 0;
@@ -483,33 +426,49 @@
     max-width: 600px;
     margin: 0 auto;
     height: 82vh;
-    border-top-left-radius: 24px;
-    border-top-right-radius: 24px;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
     background: #121214;
     border-top: 1px solid rgba(255, 255, 255, 0.15);
     display: flex;
     flex-direction: column;
-    transform: translateY(100%);
+    transform: translateY(calc(100% - 48px)); /* Peek handle at bottom */
     transition: transform .3s cubic-bezier(0.1, 0.9, 0.2, 1);
     box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.8);
+    touch-action: none;
   }
 
   .bottom-sheet.open {
-    transform: translateY(0);
+    transform: translateY(0) !important;
   }
 
   .sheet-handle-bar {
-    padding: 10px 0 6px;
+    padding: 12px 16px 10px;
     display: flex;
-    justify-content: center;
-    cursor: pointer;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: grab;
+    user-select: none;
+    background: #121214;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
   }
 
+  .sheet-handle-bar:active { cursor: grabbing; }
+
   .sheet-handle {
-    width: 38px;
+    width: 36px;
     height: 4px;
     border-radius: 2px;
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.35);
+  }
+
+  .sheet-peek-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.8);
+    letter-spacing: 0.3px;
   }
 
   .sheet-header {
@@ -526,27 +485,17 @@
     justify-content: space-between;
   }
 
-  .sheet-title {
-    font-size: 17px;
-    font-weight: 800;
-    color: #fff;
-  }
-
-  .sheet-subtitle {
-    font-size: 12px;
-    color: var(--text-dim);
-  }
+  .sheet-title { font-size: 16px; font-weight: 800; color: #fff; }
+  .sheet-subtitle { font-size: 12px; color: var(--text-dim); }
 
   .btn-close-sheet {
     border: 0;
     background: rgba(255, 255, 255, 0.1);
     color: #fff;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
-    font-size: 14px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
     cursor: pointer;
   }
 
@@ -554,16 +503,14 @@
     width: 100%;
     padding: 10px 14px;
     border: 1px solid var(--card-border);
-    border-radius: 12px;
+    border-radius: 10px;
     background: rgba(255, 255, 255, 0.05);
     color: #fff;
     font-size: 14px;
     outline: none;
   }
 
-  .sheet-search::placeholder {
-    color: rgba(255, 255, 255, 0.35);
-  }
+  .sheet-search::placeholder { color: rgba(255, 255, 255, 0.35); }
 
   .sheet-content {
     flex: 1;
@@ -572,6 +519,7 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
+    touch-action: pan-y;
   }
 
   .floor-section {
@@ -591,11 +539,7 @@
     border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
   }
 
-  .floor-stats {
-    font-size: 11px;
-    font-weight: 400;
-    color: var(--text-dim);
-  }
+  .floor-stats { font-size: 11px; font-weight: 400; color: var(--text-dim); }
 
   .room-grid {
     display: grid;
@@ -605,8 +549,8 @@
 
   .room-chip {
     padding: 8px 4px;
-    border-radius: 10px;
-    background: rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.08);
     color: #fff;
     font-size: 13px;
@@ -617,7 +561,6 @@
     flex-direction: column;
     align-items: center;
     gap: 2px;
-    transition: all .12s ease;
   }
 
   .room-chip.suite {
@@ -625,43 +568,36 @@
     background: rgba(255, 204, 0, 0.06);
   }
 
-  .room-chip.suite .chip-type {
-    color: var(--yellow);
-  }
+  .room-chip.suite .chip-type { color: var(--yellow); }
 
   .chip-type {
     font-size: 9px;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.4);
-    text-transform: uppercase;
   }
 
   .room-chip.selected {
     background: var(--yellow);
     color: #000;
     border-color: var(--yellow);
-    box-shadow: 0 2px 10px rgba(255, 204, 0, 0.4);
   }
 
-  .room-chip.selected .chip-type {
-    color: rgba(0, 0, 0, 0.7);
-  }
+  .room-chip.selected .chip-type { color: rgba(0, 0, 0, 0.7); }
 
-  /* Notifications & Flash */
+  /* Camera Message & Flash */
   .camera-message {
     position: fixed;
     left: 50%;
-    bottom: calc(env(safe-area-inset-bottom) + 80px);
+    bottom: calc(env(safe-area-inset-bottom) + 120px);
     z-index: 300;
     max-width: calc(100vw - 32px);
     padding: 10px 16px;
     border: 1px solid rgba(255,255,255,.12);
-    border-radius: 14px;
+    border-radius: 12px;
     background: rgba(26,26,28,.95);
     color: #fff;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
-    line-height: 18px;
     text-align: center;
     box-shadow: 0 12px 30px rgba(0,0,0,.45);
     opacity: 0;
@@ -670,10 +606,7 @@
     transition: opacity .18s ease, transform .18s ease;
   }
 
-  .camera-message.visible {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
+  .camera-message.visible { opacity: 1; transform: translate(-50%, 0); }
 
   .flash-effect {
     position: fixed;
@@ -684,9 +617,7 @@
     opacity: 0;
   }
 
-  .flash-effect.fire {
-    animation: cameraFlash .16s ease-out both;
-  }
+  .flash-effect.fire { animation: cameraFlash .16s ease-out both; }
 
   .hidden { display: none !important; }
 
@@ -712,13 +643,13 @@
 <div id="app">
   <!-- Header -->
   <header class="top-bar">
-    <div class="hotel-title">Hyatt Regency • Терминал</div>
+    <div class="hotel-title">Hyatt Regency Terminal</div>
     <div class="room-badge" id="roomBadge">№ 500</div>
   </header>
 
-  <!-- Main Viewport and Controls -->
+  <!-- Main View Area -->
   <main class="main-content">
-    <!-- Camera Viewfinder (Smaller height) -->
+    <!-- Camera Viewfinder -->
     <div class="viewport-container">
       <div class="viewfinder" id="viewfinder">
         <video id="camera" autoplay playsinline muted></video>
@@ -740,79 +671,74 @@
       </div>
     </div>
 
-    <!-- Controls (Shutter higher up) -->
-    <div class="controls-section">
-      <div class="shutter-grid" id="cameraActions">
-        <div class="grid-left">
-          <button class="btn-side danger" id="btnEmpty" type="button">Опустошён</button>
-        </div>
-
-        <div class="grid-center">
-          <button id="captureBtn" type="button" aria-label="Сделать фото"></button>
-        </div>
-
-        <div class="grid-right"></div>
+    <!-- Room Description Card -->
+    <div class="room-description-box" id="roomDescription">
+      <div class="desc-header">
+        <span class="desc-title" id="descRoomTitle">Номер 500</span>
+        <span class="desc-tag suite" id="descRoomTag">Люкс • 5 этаж</span>
       </div>
-
-      <div class="shutter-grid hidden" id="previewActions">
-        <div class="grid-left">
-          <button class="btn-side" id="btnRetake" type="button">✕ Переснять</button>
-        </div>
-
-        <div class="grid-center"></div>
-
-        <div class="grid-right">
-          <button class="btn-send" id="btnSend" type="button">Отправить ↑</button>
-        </div>
+      <div class="desc-body" id="descRoomText">
+        Информация о мини-баре и статус проверки (блок для будущего описания).
       </div>
+    </div>
 
-      <!-- Room Carousel -->
-      <div class="carousel-wrap" id="carouselWrap">
-        <div class="carousel-fade left"></div>
-        <div class="carousel" id="carousel" aria-label="Выбор номера"></div>
-        <div class="carousel-fade right"></div>
-      </div>
-
-      <!-- Description Container reserved for future expansion -->
-      <div class="room-description-box" id="roomDescription">
-        <div class="desc-header">
-          <span class="desc-title" id="descRoomTitle">Номер 500</span>
-          <span class="desc-tag suite" id="descRoomTag">Люкс • 5 этаж</span>
-        </div>
-        <div class="desc-body" id="descRoomText">
-          Информация о мини-баре и статус проверки (блок для будущего описания).
-        </div>
-      </div>
+    <!-- Room Carousel -->
+    <div class="carousel-wrap" id="carouselWrap">
+      <div class="carousel-fade left"></div>
+      <div class="carousel" id="carousel" aria-label="Выбор номера"></div>
+      <div class="carousel-fade right"></div>
     </div>
   </main>
 
-  <!-- Bottom Bar Button for Drawer -->
-  <footer class="bottom-bar">
-    <button class="btn-drawer-trigger" id="btnOpenSheet" type="button">
-      <span>🏢 Показать все номера (293)</span>
-      <span class="trigger-icon">▲</span>
-    </button>
+  <!-- Bottom Controls Area (Shutter Button at Bottom) -->
+  <footer class="bottom-controls-container">
+    <div class="shutter-grid" id="cameraActions">
+      <div class="grid-left">
+        <button class="btn-side danger" id="btnEmpty" type="button">Опустошён</button>
+      </div>
+
+      <div class="grid-center">
+        <button id="captureBtn" type="button" aria-label="Сделать фото"></button>
+      </div>
+
+      <div class="grid-right"></div>
+    </div>
+
+    <div class="shutter-grid hidden" id="previewActions">
+      <div class="grid-left">
+        <button class="btn-side" id="btnRetake" type="button">Переснять</button>
+      </div>
+
+      <div class="grid-center"></div>
+
+      <div class="grid-right">
+        <button class="btn-send" id="btnSend" type="button">Отправить</button>
+      </div>
+    </div>
   </footer>
 </div>
 
-<!-- Bottom Sheet (Sliding Menu) -->
+<!-- Draggable Bottom Sheet Modal -->
 <div class="sheet-overlay" id="sheetOverlay"></div>
 <div class="bottom-sheet" id="bottomSheet">
-  <div class="sheet-handle-bar" id="sheetHandleBar">
+  <div class="sheet-handle-bar" id="sheetHandleArea">
     <div class="sheet-handle"></div>
+    <div class="sheet-peek-title" id="sheetPeekTitle">Все номера отеля (293)</div>
   </div>
+
   <div class="sheet-header">
     <div class="sheet-title-row">
       <div>
         <div class="sheet-title">Все номера отеля</div>
         <div class="sheet-subtitle">293 номера (67 люксов, 226 стандартов)</div>
       </div>
-      <button class="btn-close-sheet" id="btnCloseSheet" type="button">✕</button>
+      <button class="btn-close-sheet" id="btnCloseSheet" type="button">Закрыть</button>
     </div>
-    <input type="search" class="sheet-search" id="sheetSearch" placeholder="🔍 Найти номер (например, 700, 1807)...">
+    <input type="search" class="sheet-search" id="sheetSearch" placeholder="Поиск номера (например, 700, 1807)...">
   </div>
+
   <div class="sheet-content" id="sheetContent">
-    <!-- Floors and room grids will be generated here -->
+    <!-- Generated list of rooms -->
   </div>
 </div>
 
@@ -822,21 +748,19 @@
 <script type="module">
 import bridge from 'https://cdn.jsdelivr.net/npm/@vkontakte/vk-bridge@3.0.2/+esm';
 
-/* ---------------------------------------------------------
-   Data: 293 Rooms in Hyatt Regency
---------------------------------------------------------- */
+/* Hotel Data (293 Rooms) */
 function generateRoomsData() {
   const rooms = [];
 
-  // Floor 5 (19)
+  // Floor 5
   [500, 509, 534].forEach(n => rooms.push({ number: String(n), floor: 5, type: 'suite' }));
   [502, 504, 506, 508, 510, 512, 514, 516, 518, 520, 522, 524, 526, 528, 530, 532].forEach(n => rooms.push({ number: String(n), floor: 5, type: 'standard' }));
 
-  // Floor 6 (19)
+  // Floor 6
   [600, 609, 634].forEach(n => rooms.push({ number: String(n), floor: 6, type: 'suite' }));
   [602, 604, 606, 608, 610, 612, 614, 616, 618, 620, 622, 624, 626, 628, 630, 632].forEach(n => rooms.push({ number: String(n), floor: 6, type: 'standard' }));
 
-  // Floors 7 - 17 (21 rooms per floor = 231)
+  // Floors 7 - 17
   for (let f = 7; f <= 17; f++) {
     const suites = [f*100, f*100+9, f*100+17, f*100+25, f*100+34];
     const stds = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32].map(x => f*100 + x);
@@ -844,11 +768,11 @@ function generateRoomsData() {
     stds.forEach(n => rooms.push({ number: String(n), floor: f, type: 'standard' }));
   }
 
-  // Floor 18 (12)
+  // Floor 18
   [1800, 1807, 1811, 1818].forEach(n => rooms.push({ number: String(n), floor: 18, type: 'suite' }));
   [1802, 1804, 1806, 1808, 1810, 1812, 1814, 1816].forEach(n => rooms.push({ number: String(n), floor: 18, type: 'standard' }));
 
-  // Floor 19 (12)
+  // Floor 19
   [1911, 1919].forEach(n => rooms.push({ number: String(n), floor: 19, type: 'suite' }));
   [1902, 1904, 1906, 1908, 1910, 1912, 1914, 1916, 1918, 1920].forEach(n => rooms.push({ number: String(n), floor: 19, type: 'standard' }));
 
@@ -858,7 +782,7 @@ function generateRoomsData() {
 
 const ALL_ROOMS = generateRoomsData();
 
-/* DOM elements */
+/* Elements */
 const video = document.getElementById('camera');
 const photo = document.getElementById('photo');
 const canvas = document.createElement('canvas');
@@ -879,18 +803,15 @@ const roomBadge = document.getElementById('roomBadge');
 const message = document.getElementById('message');
 const flashEffect = document.getElementById('flashEffect');
 
-/* Description elements */
 const descRoomTitle = document.getElementById('descRoomTitle');
 const descRoomTag = document.getElementById('descRoomTag');
 
-/* Bottom Sheet elements */
-const btnOpenSheet = document.getElementById('btnOpenSheet');
 const btnCloseSheet = document.getElementById('btnCloseSheet');
 const sheetOverlay = document.getElementById('sheetOverlay');
 const bottomSheet = document.getElementById('bottomSheet');
 const sheetContent = document.getElementById('sheetContent');
 const sheetSearch = document.getElementById('sheetSearch');
-const sheetHandleBar = document.getElementById('sheetHandleBar');
+const sheetHandleArea = document.getElementById('sheetHandleArea');
 
 let stream = null;
 let videoTrack = null;
@@ -916,7 +837,6 @@ function setBusy(button, busy) {
   button.setAttribute('aria-busy', String(busy));
 }
 
-/* VK Bridge */
 async function initVK() {
   try {
     await bridge.send('VKWebAppInit');
@@ -926,9 +846,7 @@ async function initVK() {
         await bridge.send('VKWebAppDisableSwipeBack');
       }
     } catch (_) {}
-  } catch (_) {
-    isVKReady = false;
-  }
+  } catch (_) { isVKReady = false; }
 }
 
 async function triggerHaptic() {
@@ -950,12 +868,10 @@ async function setVKFlashLevel(level) {
     if (!bridge.supports('VKWebAppFlashSetLevel')) return false;
     await bridge.send('VKWebAppFlashSetLevel', { level });
     return true;
-  } catch (_) {
-    return false;
-  }
+  } catch (_) { return false; }
 }
 
-/* Camera setup */
+/* Camera Management */
 function resetLoader() {
   cameraLoader.classList.remove('error');
   loaderSpinner.classList.remove('hidden');
@@ -1041,10 +957,7 @@ async function startCamera() {
 
     await new Promise((resolve, reject) => {
       const timeout = setTimeout(() => reject(new Error('Camera start timeout')), 8000);
-      const done = () => {
-        clearTimeout(timeout);
-        resolve();
-      };
+      const done = () => { clearTimeout(timeout); resolve(); };
 
       if (video.readyState >= HTMLMediaElement.HAVE_METADATA) {
         done();
@@ -1065,7 +978,6 @@ async function startCamera() {
   }
 }
 
-/* Flash */
 function supportsNativePhotoFlash() {
   const modes = photoCapabilities?.fillLightMode;
   return Array.isArray(modes) && modes.includes('flash');
@@ -1078,16 +990,12 @@ async function enableTorchFallback() {
     if (!('torch' in capabilities)) return false;
     await videoTrack.applyConstraints({ advanced: [{ torch: true }] });
     return true;
-  } catch (_) {
-    return false;
-  }
+  } catch (_) { return false; }
 }
 
 async function disableTorchFallback() {
   if (!videoTrack?.applyConstraints) return;
-  try {
-    await videoTrack.applyConstraints({ advanced: [{ torch: false }] });
-  } catch (_) {}
+  try { await videoTrack.applyConstraints({ advanced: [{ torch: false }] }); } catch (_) {}
 }
 
 async function takeNativePhoto() {
@@ -1131,7 +1039,6 @@ function drawVideoToCanvas() {
   return canvas.toDataURL('image/jpeg', .94);
 }
 
-/* Photo preview */
 function releasePreviewUrl() {
   if (previewUrl) {
     URL.revokeObjectURL(previewUrl);
@@ -1175,7 +1082,7 @@ function resetPhoto() {
   try { video.play(); } catch (_) {}
 }
 
-/* Carousel rendering & handling */
+/* Carousel */
 function buildCarousel() {
   carousel.innerHTML = '';
   const fragment = document.createDocumentFragment();
@@ -1186,7 +1093,6 @@ function buildCarousel() {
     el.className = 'num-item';
     el.dataset.number = room.number;
     el.textContent = room.number;
-    el.setAttribute('aria-label', `Номер ${room.number}`);
     fragment.appendChild(el);
   });
 
@@ -1202,23 +1108,19 @@ function updateSelectedRoomState(room, vibrate = false) {
   const changed = selectedRoom !== room;
   selectedRoom = room;
 
-  // Carousel highlight
   const items = carousel.querySelectorAll('.num-item');
   items.forEach(item => {
     const isCur = item.dataset.number === room.number;
     item.classList.toggle('active', isCur);
   });
 
-  // Header badge
   roomBadge.textContent = `№ ${room.number}`;
 
-  // Description update
   descRoomTitle.textContent = `Номер ${room.number}`;
   const isSuite = room.type === 'suite';
-  descRoomTag.textContent = `${isSuite ? '★ Люкс' : 'Стандарт'} • ${room.floor} этаж`;
+  descRoomTag.textContent = `${isSuite ? 'Люкс' : 'Стандарт'} • ${room.floor} этаж`;
   descRoomTag.className = `desc-tag ${isSuite ? 'suite' : ''}`;
 
-  // Sync drawer active chip
   updateDrawerSelectedChip(room.number);
 
   if (vibrate && changed) triggerHaptic();
@@ -1274,10 +1176,14 @@ carousel.addEventListener('click', event => {
   selectRoomByNumber(item.dataset.number);
 });
 
-/* ---------- Bottom Sheet Drawer logic ---------- */
+/* Draggable Drawer Logic */
+let isSheetOpen = false;
+let startY = 0;
+let currentY = 0;
+let isDragging = false;
+
 function renderDrawerRooms(filterQuery = '') {
   sheetContent.innerHTML = '';
-
   const q = filterQuery.trim().toLowerCase();
   const floors = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
 
@@ -1285,10 +1191,7 @@ function renderDrawerRooms(filterQuery = '') {
 
   floors.forEach(floorNum => {
     let floorRooms = ALL_ROOMS.filter(r => r.floor === floorNum);
-
-    if (q) {
-      floorRooms = floorRooms.filter(r => r.number.toLowerCase().includes(q));
-    }
+    if (q) floorRooms = floorRooms.filter(r => r.number.toLowerCase().includes(q));
 
     if (floorRooms.length === 0) return;
     hasAny = true;
@@ -1332,43 +1235,83 @@ function renderDrawerRooms(filterQuery = '') {
   });
 
   if (!hasAny) {
-    sheetContent.innerHTML = `
-      <div style="text-align: center; color: var(--text-dim); padding: 40px 0;">
-        Номера не найдены
-      </div>
-    `;
+    sheetContent.innerHTML = `<div style="text-align: center; color: var(--text-dim); padding: 40px 0;">Номера не найдены</div>`;
   }
 }
 
 function updateDrawerSelectedChip(numStr) {
   const chips = sheetContent.querySelectorAll('.room-chip');
-  chips.forEach(chip => {
-    chip.classList.toggle('selected', chip.dataset.roomNumber === numStr);
-  });
+  chips.forEach(chip => chip.classList.toggle('selected', chip.dataset.roomNumber === numStr));
 }
 
 function openSheet() {
+  isSheetOpen = true;
   renderDrawerRooms(sheetSearch.value);
   sheetOverlay.classList.add('active');
   bottomSheet.classList.add('open');
+  bottomSheet.style.transform = '';
   triggerHaptic();
 }
 
 function closeSheet() {
+  isSheetOpen = false;
   sheetOverlay.classList.remove('active');
   bottomSheet.classList.remove('open');
+  bottomSheet.style.transform = '';
 }
 
-btnOpenSheet.addEventListener('click', openSheet);
-btnCloseSheet.addEventListener('click', closeSheet);
-sheetOverlay.addEventListener('click', closeSheet);
-sheetHandleBar.addEventListener('click', closeSheet);
+/* Touch drag handling */
+sheetHandleArea.addEventListener('touchstart', e => {
+  startY = e.touches[0].clientY;
+  isDragging = true;
+  bottomSheet.style.transition = 'none';
+}, { passive: true });
 
-sheetSearch.addEventListener('input', (e) => {
-  renderDrawerRooms(e.target.value);
+window.addEventListener('touchmove', e => {
+  if (!isDragging) return;
+  currentY = e.touches[0].clientY;
+  const deltaY = currentY - startY;
+
+  if (!isSheetOpen) {
+    // Dragging UP to open
+    if (deltaY < 0) {
+      const move = Math.max(0, 100 + (deltaY / (window.innerHeight * 0.8)) * 100);
+      bottomSheet.style.transform = `translateY(${move}%)`;
+    }
+  } else {
+    // Dragging DOWN to close
+    if (deltaY > 0) {
+      const move = Math.min(100, (deltaY / (window.innerHeight * 0.8)) * 100);
+      bottomSheet.style.transform = `translateY(${move}%)`;
+    }
+  }
+}, { passive: true });
+
+window.addEventListener('touchend', e => {
+  if (!isDragging) return;
+  isDragging = false;
+  bottomSheet.style.transition = 'transform .3s cubic-bezier(0.1, 0.9, 0.2, 1)';
+
+  const deltaY = currentY - startY;
+  if (!isSheetOpen) {
+    if (deltaY < -40) openSheet();
+    else closeSheet();
+  } else {
+    if (deltaY > 50) closeSheet();
+    else openSheet();
+  }
 });
 
-/* Capture button action */
+sheetHandleArea.addEventListener('click', () => {
+  if (isSheetOpen) closeSheet();
+  else openSheet();
+});
+
+btnCloseSheet.addEventListener('click', closeSheet);
+sheetOverlay.addEventListener('click', closeSheet);
+sheetSearch.addEventListener('input', e => renderDrawerRooms(e.target.value));
+
+/* Capture button */
 async function takePhoto() {
   if (isCapturing || isPreview || !videoTrack) return;
   if (!video.videoWidth || !video.videoHeight) {
@@ -1411,26 +1354,22 @@ async function takePhoto() {
 }
 
 captureBtn.addEventListener('click', takePhoto);
-
-btnRetake.addEventListener('click', () => {
-  resetPhoto();
-  triggerHaptic();
-});
+btnRetake.addEventListener('click', () => { resetPhoto(); triggerHaptic(); });
 
 btnSend.addEventListener('click', async () => {
   if (!isPreview || btnSend.classList.contains('busy')) return;
 
   setBusy(btnSend, true);
-  const original = btnSend.innerHTML;
+  const original = btnSend.textContent;
   btnSend.textContent = 'Отправка…';
 
   await new Promise(r => setTimeout(r, 650));
 
-  btnSend.textContent = 'Отправлено ✓';
+  btnSend.textContent = 'Отправлено';
   await triggerHaptic();
 
   setTimeout(() => {
-    btnSend.innerHTML = original;
+    btnSend.textContent = original;
     setBusy(btnSend, false);
     resetPhoto();
   }, 650);
@@ -1443,19 +1382,12 @@ btnEmpty.addEventListener('click', async () => {
 
 loaderRetry.addEventListener('click', startCamera);
 
-window.addEventListener('pagehide', () => {
-  stopCamera();
-  releasePreviewUrl();
-});
+window.addEventListener('pagehide', () => { stopCamera(); releasePreviewUrl(); });
+window.addEventListener('beforeunload', () => { stopCamera(); releasePreviewUrl(); });
 
-window.addEventListener('beforeunload', () => {
-  stopCamera();
-  releasePreviewUrl();
-});
-
-/* Init */
 (async function boot() {
   buildCarousel();
+  renderDrawerRooms();
   await initVK();
   await startCamera();
 })();
