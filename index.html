@@ -62,7 +62,7 @@
     z-index: 10;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     padding: calc(env(safe-area-inset-top) + 8px) 16px 8px;
     background: #000;
     flex-shrink: 0;
@@ -88,16 +88,6 @@
     color: var(--accent);
   }
 
-  .room-badge {
-    padding: 5px 12px;
-    border: 1px solid rgba(255, 204, 0, 0.4);
-    border-radius: 999px;
-    background: var(--yellow-bg);
-    color: var(--yellow);
-    font-size: 14px;
-    font-weight: 800;
-    letter-spacing: 0.3px;
-  }
 
   /* Main View Area */
   .main-content {
@@ -116,8 +106,9 @@
     position: relative;
     width: 100%;
     max-width: 440px;
-    flex: 1;
-    min-height: 200px;
+    flex: 0 1 auto;
+    aspect-ratio: var(--camera-aspect, 0.75);
+    min-height: 0;
     border-radius: 20px;
     overflow: hidden;
     background: #0b0b0d;
@@ -148,10 +139,7 @@
     transition: opacity .2s ease;
   }
 
-  #camera.ready {
-    opacity: 1;
-  }
-
+  #camera.ready { opacity: 1; }
   #photo {
     z-index: 2;
     object-fit: contain;
@@ -174,37 +162,10 @@
     border-width: 0;
   }
 
-  .focus-corner.tl {
-    top: 14px;
-    left: 14px;
-    border-top-width: 2px;
-    border-left-width: 2px;
-    border-top-left-radius: 4px;
-  }
-
-  .focus-corner.tr {
-    top: 14px;
-    right: 14px;
-    border-top-width: 2px;
-    border-right-width: 2px;
-    border-top-right-radius: 4px;
-  }
-
-  .focus-corner.bl {
-    bottom: 14px;
-    left: 14px;
-    border-bottom-width: 2px;
-    border-left-width: 2px;
-    border-bottom-left-radius: 4px;
-  }
-
-  .focus-corner.br {
-    bottom: 14px;
-    right: 14px;
-    border-bottom-width: 2px;
-    border-right-width: 2px;
-    border-bottom-right-radius: 4px;
-  }
+  .focus-corner.tl { top: 14px; left: 14px; border-top-width: 2px; border-left-width: 2px; border-top-left-radius: 4px; }
+  .focus-corner.tr { top: 14px; right: 14px; border-top-width: 2px; border-right-width: 2px; border-top-right-radius: 4px; }
+  .focus-corner.bl { bottom: 14px; left: 14px; border-bottom-width: 2px; border-left-width: 2px; border-bottom-left-radius: 4px; }
+  .focus-corner.br { bottom: 14px; right: 14px; border-bottom-width: 2px; border-right-width: 2px; border-bottom-right-radius: 4px; }
 
   .camera-loader {
     position: absolute;
@@ -231,17 +192,8 @@
     animation: spin .75s linear infinite;
   }
 
-  .loader-title {
-    font-weight: 700;
-    color: #fff;
-  }
-
-  .loader-subtitle {
-    max-width: 260px;
-    line-height: 16px;
-    color: rgba(255,255,255,.5);
-    font-size: 12px;
-  }
+  .loader-title { font-weight: 700; color: #fff; }
+  .loader-subtitle { max-width: 260px; line-height: 16px; color: rgba(255,255,255,.5); font-size: 12px; }
 
   .loader-retry {
     margin-top: 4px;
@@ -277,15 +229,8 @@
     pointer-events: none;
   }
 
-  .carousel-fade.left {
-    left: 0;
-    background: linear-gradient(90deg, #000 0%, rgba(0,0,0,0) 100%);
-  }
-
-  .carousel-fade.right {
-    right: 0;
-    background: linear-gradient(270deg, #000 0%, rgba(0,0,0,0) 100%);
-  }
+  .carousel-fade.left { left: 0; background: linear-gradient(90deg, #000 0%, rgba(0,0,0,0) 100%); }
+  .carousel-fade.right { right: 0; background: linear-gradient(270deg, #000 0%, rgba(0,0,0,0) 100%); }
 
   .carousel {
     width: 100%;
@@ -302,9 +247,7 @@
     touch-action: pan-x;
   }
 
-  .carousel::-webkit-scrollbar {
-    display: none;
-  }
+  .carousel::-webkit-scrollbar { display: none; }
 
   .num-item {
     flex: 0 0 72px;
@@ -399,17 +342,9 @@
     padding: 0 16px;
   }
 
-  .grid-left {
-    justify-self: start;
-  }
-
-  .grid-center {
-    justify-self: center;
-  }
-
-  .grid-right {
-    justify-self: end;
-  }
+  .grid-left { justify-self: start; }
+  .grid-center { justify-self: center; }
+  .grid-right { justify-self: end; }
 
   .btn-side {
     min-height: 38px;
@@ -424,10 +359,7 @@
     transition: transform .1s ease, background .15s ease;
   }
 
-  .btn-side:active,
-  .btn-send:active {
-    transform: scale(.95);
-  }
+  .btn-side:active, .btn-send:active { transform: scale(.95); }
 
   .btn-side.danger {
     background: rgba(255, 90, 95, 0.12);
@@ -457,14 +389,8 @@
     background: #fff;
   }
 
-  #captureBtn:active {
-    transform: scale(.91);
-  }
-
-  #captureBtn.busy {
-    opacity: .45;
-    pointer-events: none;
-  }
+  #captureBtn:active { transform: scale(.91); }
+  #captureBtn.busy { opacity: .45; pointer-events: none; }
 
   .btn-send {
     min-height: 40px;
@@ -567,16 +493,8 @@
     justify-content: space-between;
   }
 
-  .sheet-title {
-    font-size: 16px;
-    font-weight: 800;
-    color: #fff;
-  }
-
-  .sheet-subtitle {
-    font-size: 12px;
-    color: var(--text-dim);
-  }
+  .sheet-title { font-size: 16px; font-weight: 800; color: #fff; }
+  .sheet-subtitle { font-size: 12px; color: var(--text-dim); }
 
   .btn-close-sheet {
     border: 0;
@@ -627,11 +545,7 @@
     border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
   }
 
-  .floor-stats {
-    font-size: 11px;
-    font-weight: 400;
-    color: var(--text-dim);
-  }
+  .floor-stats { font-size: 11px; font-weight: 400; color: var(--text-dim); }
 
   .room-grid {
     display: grid;
@@ -660,9 +574,7 @@
     background: rgba(255, 204, 0, 0.06);
   }
 
-  .room-chip.suite .chip-type {
-    color: var(--yellow);
-  }
+  .room-chip.suite .chip-type { color: var(--yellow); }
 
   .chip-type {
     font-size: 9px;
@@ -676,9 +588,7 @@
     border-color: var(--yellow);
   }
 
-  .room-chip.selected .chip-type {
-    color: rgba(0, 0, 0, 0.7);
-  }
+  .room-chip.selected .chip-type { color: rgba(0, 0, 0, 0.7); }
 
   /* Notification Message */
   .camera-message {
@@ -701,26 +611,14 @@
     transition: opacity .18s ease, transform .18s ease;
   }
 
-  .camera-message.visible {
-    opacity: 1;
-    transform: translate3d(-50%, 0, 0);
-  }
+  .camera-message.visible { opacity: 1; transform: translate3d(-50%, 0, 0); }
 
-  .hidden {
-    display: none !important;
-  }
+  .hidden { display: none !important; }
 
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
   @media (min-width: 700px) {
-    :root {
-      --page-pad: 20px;
-    }
-
+    :root { --page-pad: 20px; }
     #app {
       max-width: 600px;
       margin: 0 auto;
@@ -730,31 +628,23 @@
   }
 </style>
 </head>
-
 <body>
 <div id="app">
-
+  <!-- Top Header with Queue Indicator -->
   <header class="top-bar">
     <div class="hotel-info">
       <div class="hotel-title">MINIBAR OS</div>
       <div class="queue-count" id="queueCount">В очереди: 0 номеров</div>
     </div>
-
-    <div class="room-badge" id="roomBadge">№ 500</div>
   </header>
 
+  <!-- Main View Area -->
   <main class="main-content">
-
+    <!-- Camera Viewfinder -->
     <div class="viewport-container">
       <div class="viewfinder" id="viewfinder">
-
         <video id="camera" autoplay playsinline muted></video>
-
-        <img
-          id="photo"
-          alt="Сделать снимок"
-          class="hidden"
-        >
+        <img id="photo" alt="Сделать снимок" class="hidden">
 
         <div class="camera-overlay" aria-hidden="true">
           <span class="focus-corner tl"></span>
@@ -765,2590 +655,861 @@
 
         <div class="camera-loader" id="cameraLoader">
           <div class="loader-spinner" id="loaderSpinner"></div>
-
-          <div class="loader-title" id="loaderTitle">
-            Запуск камеры…
-          </div>
-
-          <div class="loader-subtitle" id="loaderSubtitle">
-            Разреши доступ к камере, чтобы сделать снимок.
-          </div>
-
-          <button
-            class="loader-retry hidden"
-            id="loaderRetry"
-            type="button"
-          >
-            Повторить
-          </button>
+          <div class="loader-title" id="loaderTitle">Запуск камеры…</div>
+          <div class="loader-subtitle" id="loaderSubtitle">Разреши доступ к камере, чтобы сделать снимок.</div>
+          <button class="loader-retry hidden" id="loaderRetry" type="button">Повторить</button>
         </div>
-
       </div>
     </div>
 
+    <!-- Room Carousel -->
     <div class="carousel-wrap" id="carouselWrap">
       <div class="carousel-fade left"></div>
-
-      <div
-        class="carousel"
-        id="carousel"
-        aria-label="Выбор номера"
-      ></div>
-
+      <div class="carousel" id="carousel" aria-label="Выбор номера"></div>
       <div class="carousel-fade right"></div>
     </div>
 
-    <div
-      class="room-description-box"
-      id="roomDescription"
-    >
+    <!-- Description Card -->
+    <div class="room-description-box" id="roomDescription">
       <div class="desc-header">
-
-        <span
-          class="desc-title"
-          id="descRoomTitle"
-        >
-          Номер 500
-        </span>
-
-        <span
-          class="desc-tag suite"
-          id="descRoomTag"
-        >
-          Люкс • 5 этаж
-        </span>
-
+        <span class="desc-title" id="descRoomTitle">Номер 500</span>
+        <span class="desc-tag suite" id="descRoomTag">Люкс • 5 этаж</span>
       </div>
-
-      <div
-        class="desc-body"
-        id="descRoomText"
-      >
+      <div class="desc-body" id="descRoomText">
         Информация о мини-баре и статус проверки (блок для будущего описания).
       </div>
     </div>
-
   </main>
 
+  <!-- Bottom Controls Area -->
   <footer class="bottom-controls-container">
-
-    <div
-      class="shutter-grid"
-      id="cameraActions"
-    >
-
+    <div class="shutter-grid" id="cameraActions">
       <div class="grid-left">
-        <button
-          class="btn-side danger"
-          id="btnEmpty"
-          type="button"
-        >
-          Опустошён
-        </button>
+        <button class="btn-side danger" id="btnEmpty" type="button">Опустошён</button>
       </div>
 
       <div class="grid-center">
-        <button
-          id="captureBtn"
-          type="button"
-          aria-label="Сделать фото"
-        ></button>
+        <button id="captureBtn" type="button" aria-label="Сделать фото"></button>
       </div>
 
       <div class="grid-right"></div>
-
     </div>
 
-    <div
-      class="shutter-grid hidden"
-      id="previewActions"
-    >
-
+    <div class="shutter-grid hidden" id="previewActions">
       <div class="grid-left">
-        <button
-          class="btn-side"
-          id="btnRetake"
-          type="button"
-        >
-          Переснять
-        </button>
+        <button class="btn-side" id="btnRetake" type="button">Переснять</button>
       </div>
 
       <div class="grid-center"></div>
 
       <div class="grid-right">
-        <button
-          class="btn-send"
-          id="btnSend"
-          type="button"
-        >
-          Отправить
-        </button>
+        <button class="btn-send" id="btnSend" type="button">Отправить</button>
       </div>
-
     </div>
-
   </footer>
-
 </div>
 
-<div
-  class="sheet-overlay"
-  id="sheetOverlay"
-></div>
-
-<div
-  class="bottom-sheet"
-  id="bottomSheet"
->
-
-  <div
-    class="sheet-handle-bar"
-    id="sheetHandleArea"
-  >
+<!-- Bottom Sheet Modal -->
+<div class="sheet-overlay" id="sheetOverlay"></div>
+<div class="bottom-sheet" id="bottomSheet">
+  <div class="sheet-handle-bar" id="sheetHandleArea">
     <div class="sheet-handle"></div>
-
-    <div
-      class="sheet-peek-title"
-      id="sheetPeekTitle"
-    >
-      Показать все номера
-    </div>
+    <div class="sheet-peek-title" id="sheetPeekTitle">Показать все номера</div>
   </div>
 
   <div class="sheet-header">
-
     <div class="sheet-title-row">
-
       <div>
-
-        <div class="sheet-title">
-          Все номера отеля
-        </div>
-
-        <div
-          class="sheet-subtitle"
-          id="sheetSubtitle"
-        >
-          293 номера
-        </div>
-
+        <div class="sheet-title">Все номера отеля</div>
+        <div class="sheet-subtitle" id="sheetSubtitle">293 номера</div>
       </div>
-
-      <button
-        class="btn-close-sheet"
-        id="btnCloseSheet"
-        type="button"
-      >
-        Закрыть
-      </button>
-
+      <button class="btn-close-sheet" id="btnCloseSheet" type="button">Закрыть</button>
     </div>
-
-    <input
-      type="search"
-      class="sheet-search"
-      id="sheetSearch"
-      placeholder="Поиск номера..."
-    >
-
+    <input type="search" class="sheet-search" id="sheetSearch" placeholder="Поиск номера...">
   </div>
 
-  <div
-    class="sheet-content"
-    id="sheetContent"
-  ></div>
-
+  <div class="sheet-content" id="sheetContent"></div>
 </div>
 
-<div
-  class="camera-message"
-  id="message"
-></div>
+<div class="camera-message" id="message"></div>
 
 <script type="module">
-
 import bridge from 'https://cdn.jsdelivr.net/npm/@vkontakte/vk-bridge@3.0.2/+esm';
 
 /* Rooms Data Generator */
-
 function generateRoomsData() {
-
   const rooms = [];
+  [500, 509, 534].forEach(n => rooms.push({ number: String(n), floor: 5, type: 'suite' }));
+  [502, 504, 506, 508, 510, 512, 514, 516, 518, 520, 522, 524, 526, 528, 530, 532].forEach(n => rooms.push({ number: String(n), floor: 5, type: 'standard' }));
 
-  [500, 509, 534].forEach(n =>
-    rooms.push({
-      number: String(n),
-      floor: 5,
-      type: 'suite'
-    })
-  );
-
-  [
-    502, 504, 506, 508, 510, 512, 514, 516,
-    518, 520, 522, 524, 526, 528, 530, 532
-  ].forEach(n =>
-    rooms.push({
-      number: String(n),
-      floor: 5,
-      type: 'standard'
-    })
-  );
-
-  [600, 609, 634].forEach(n =>
-    rooms.push({
-      number: String(n),
-      floor: 6,
-      type: 'suite'
-    })
-  );
-
-  [
-    602, 604, 606, 608, 610, 612, 614, 616,
-    618, 620, 622, 624, 626, 628, 630, 632
-  ].forEach(n =>
-    rooms.push({
-      number: String(n),
-      floor: 6,
-      type: 'standard'
-    })
-  );
+  [600, 609, 634].forEach(n => rooms.push({ number: String(n), floor: 6, type: 'suite' }));
+  [602, 604, 606, 608, 610, 612, 614, 616, 618, 620, 622, 624, 626, 628, 630, 632].forEach(n => rooms.push({ number: String(n), floor: 6, type: 'standard' }));
 
   for (let f = 7; f <= 17; f++) {
-
-    const suites = [
-      f * 100,
-      f * 100 + 9,
-      f * 100 + 17,
-      f * 100 + 25,
-      f * 100 + 34
-    ];
-
-    const stds = [
-      2, 4, 6, 8,
-      10, 12, 14, 16,
-      18, 20, 22, 24,
-      26, 28, 30, 32
-    ].map(x => f * 100 + x);
-
-    suites.forEach(n =>
-      rooms.push({
-        number: String(n),
-        floor: f,
-        type: 'suite'
-      })
-    );
-
-    stds.forEach(n =>
-      rooms.push({
-        number: String(n),
-        floor: f,
-        type: 'standard'
-      })
-    );
+    const suites = [f*100, f*100+9, f*100+17, f*100+25, f*100+34];
+    const stds = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32].map(x => f*100 + x);
+    suites.forEach(n => rooms.push({ number: String(n), floor: f, type: 'suite' }));
+    stds.forEach(n => rooms.push({ number: String(n), floor: f, type: 'standard' }));
   }
 
-  [1800, 1807, 1811, 1818].forEach(n =>
-    rooms.push({
-      number: String(n),
-      floor: 18,
-      type: 'suite'
-    })
-  );
+  [1800, 1807, 1811, 1818].forEach(n => rooms.push({ number: String(n), floor: 18, type: 'suite' }));
+  [1802, 1804, 1806, 1808, 1810, 1812, 1814, 1816].forEach(n => rooms.push({ number: String(n), floor: 18, type: 'standard' }));
 
-  [
-    1802, 1804, 1806, 1808,
-    1810, 1812, 1814, 1816
-  ].forEach(n =>
-    rooms.push({
-      number: String(n),
-      floor: 18,
-      type: 'standard'
-    })
-  );
+  [1911, 1919].forEach(n => rooms.push({ number: String(n), floor: 19, type: 'suite' }));
+  [1902, 1904, 1906, 1908, 1910, 1912, 1914, 1916, 1918, 1920].forEach(n => rooms.push({ number: String(n), floor: 19, type: 'standard' }));
 
-  [1911, 1919].forEach(n =>
-    rooms.push({
-      number: String(n),
-      floor: 19,
-      type: 'suite'
-    })
-  );
-
-  [
-    1902, 1904, 1906, 1908,
-    1910, 1912, 1914, 1916,
-    1918, 1920
-  ].forEach(n =>
-    rooms.push({
-      number: String(n),
-      floor: 19,
-      type: 'standard'
-    })
-  );
-
-  rooms.sort(
-    (a, b) =>
-      Number(a.number) - Number(b.number)
-  );
-
+  rooms.sort((a, b) => Number(a.number) - Number(b.number));
   return rooms;
 }
 
 const ALL_ROOMS = generateRoomsData();
+let queueRemaining = ALL_ROOMS.length; // Инициализация реальным количеством из базы
 
-let queueRemaining = ALL_ROOMS.length;
-
-
-/* =========================================================
-   Orientation Tracking
-   ========================================================= */
-
+/* Orientation Tracking
+   Не полагаемся только на screen.orientation: при выключенном
+   автоповороте он может оставаться 0°. Для снимка важнее физическое
+   положение телефона в момент нажатия кнопки. */
 let currentDeviceAngle = 0;
 let lastSensorOrientationAt = 0;
 
 function normalizeAngle(angle) {
-
-  return (
-    ((Number(angle) || 0) % 360) + 360
-  ) % 360;
-
+  return ((Number(angle) || 0) % 360 + 360) % 360;
 }
 
 function updateOrientationFromScreen() {
-
-  if (
-    window.screen &&
-    window.screen.orientation &&
-    typeof window.screen.orientation.angle === 'number'
-  ) {
-
-    currentDeviceAngle =
-      normalizeAngle(
-        window.screen.orientation.angle
-      );
-
+  if (window.screen && window.screen.orientation && typeof window.screen.orientation.angle === 'number') {
+    currentDeviceAngle = normalizeAngle(window.screen.orientation.angle);
     return;
   }
-
   if (typeof window.orientation === 'number') {
-
-    currentDeviceAngle =
-      normalizeAngle(
-        window.orientation
-      );
-
+    currentDeviceAngle = normalizeAngle(window.orientation);
   }
-
 }
 
-function updateOrientationFromSensor(
-  beta,
-  gamma
-) {
-
-  if (
-    !Number.isFinite(beta) ||
-    !Number.isFinite(gamma)
-  ) {
-    return;
-  }
+function updateOrientationFromSensor(beta, gamma) {
+  if (!Number.isFinite(beta) || !Number.isFinite(gamma)) return;
 
   const absBeta = Math.abs(beta);
   const absGamma = Math.abs(gamma);
 
-  /*
-    Телефон вертикально:
-      beta  ≈ +90 → 0°
-      beta  ≈ -90 → 180°
-
-    Телефон горизонтально:
-      gamma > 0 → 90°
-      gamma < 0 → 270°
-  */
-
-  if (
-    absGamma >= 45 &&
-    absBeta <= 70
-  ) {
-
-    currentDeviceAngle =
-      gamma > 0 ? 90 : 270;
-
-    lastSensorOrientationAt =
-      Date.now();
-
+  // Portrait: phone is held upright. Landscape: phone is turned left/right.
+  if (absGamma >= 45 && absBeta <= 70) {
+    currentDeviceAngle = gamma > 0 ? 90 : 270;
+    lastSensorOrientationAt = Date.now();
     return;
   }
 
-  if (
-    absBeta >= 45 &&
-    absGamma <= 55
-  ) {
-
-    currentDeviceAngle =
-      beta < 0 ? 180 : 0;
-
-    lastSensorOrientationAt =
-      Date.now();
-
+  if (absBeta >= 45 && absGamma <= 55) {
+    currentDeviceAngle = beta < 0 ? 180 : 0;
+    lastSensorOrientationAt = Date.now();
   }
-
 }
 
 function getCaptureOrientationAngle() {
-
-  /*
-    При выключенном автоповороте
-    screen.orientation может всегда
-    оставаться 0°.
-
-    Поэтому свежий sensor event имеет приоритет.
-  */
-
-  if (
-    Date.now() -
-    lastSensorOrientationAt <
-    1500
-  ) {
-
-    return normalizeAngle(
-      currentDeviceAngle
-    );
-
+  // The sensor is authoritative when it has produced a recent sample.
+  if (Date.now() - lastSensorOrientationAt < 1500) {
+    return normalizeAngle(currentDeviceAngle);
   }
 
   updateOrientationFromScreen();
-
-  return normalizeAngle(
-    currentDeviceAngle
-  );
-
+  return normalizeAngle(currentDeviceAngle);
 }
 
-window.addEventListener(
-  'orientationchange',
-  updateOrientationFromScreen
-);
-
-if (
-  window.screen &&
-  window.screen.orientation
-) {
-
-  window.screen.orientation.addEventListener(
-    'change',
-    updateOrientationFromScreen
-  );
-
+window.addEventListener('orientationchange', () => {
+  updateOrientationFromScreen();
+  syncLiveViewportAspect();
+});
+if (window.screen && window.screen.orientation) {
+  window.screen.orientation.addEventListener('change', () => {
+    updateOrientationFromScreen();
+    syncLiveViewportAspect();
+  });
 }
-
 updateOrientationFromScreen();
 
 function handleDeviceOrientationEvent(e) {
-
-  updateOrientationFromSensor(
-    e.beta,
-    e.gamma
-  );
-
+  updateOrientationFromSensor(e.beta, e.gamma);
 }
 
 if (window.DeviceOrientationEvent) {
-
-  window.addEventListener(
-    'deviceorientation',
-    handleDeviceOrientationEvent,
-    true
-  );
-
-  window.addEventListener(
-    'deviceorientationabsolute',
-    handleDeviceOrientationEvent,
-    true
-  );
-
+  window.addEventListener('deviceorientation', handleDeviceOrientationEvent, true);
+  window.addEventListener('deviceorientationabsolute', handleDeviceOrientationEvent, true);
 }
 
+/* Elements */
+const video = document.getElementById('camera');
+const photo = document.getElementById('photo');
+const viewportContainer = document.querySelector('.viewport-container');
+const canvas = document.createElement('canvas');
+const cameraLoader = document.getElementById('cameraLoader');
+const loaderSpinner = document.getElementById('loaderSpinner');
+const loaderTitle = document.getElementById('loaderTitle');
+const loaderSubtitle = document.getElementById('loaderSubtitle');
+const loaderRetry = document.getElementById('loaderRetry');
+const carousel = document.getElementById('carousel');
+const captureBtn = document.getElementById('captureBtn');
+const btnRetake = document.getElementById('btnRetake');
+const btnSend = document.getElementById('btnSend');
+const btnEmpty = document.getElementById('btnEmpty');
+const cameraActions = document.getElementById('cameraActions');
+const previewActions = document.getElementById('previewActions');
+const carouselWrap = document.getElementById('carouselWrap');
+const queueCount = document.getElementById('queueCount');
+const message = document.getElementById('message');
 
-/* =========================================================
-   Elements
-   ========================================================= */
+const descRoomTitle = document.getElementById('descRoomTitle');
+const descRoomTag = document.getElementById('descRoomTag');
 
-const video =
-  document.getElementById('camera');
+const btnCloseSheet = document.getElementById('btnCloseSheet');
+const sheetOverlay = document.getElementById('sheetOverlay');
+const bottomSheet = document.getElementById('bottomSheet');
+const sheetContent = document.getElementById('sheetContent');
+const sheetSearch = document.getElementById('sheetSearch');
+const sheetHandleArea = document.getElementById('sheetHandleArea');
+const sheetPeekTitle = document.getElementById('sheetPeekTitle');
+const sheetSubtitle = document.getElementById('sheetSubtitle');
 
-const photo =
-  document.getElementById('photo');
+function setViewportAspect(width, height) {
+  if (!viewportContainer || !width || !height) return;
+  viewportContainer.style.setProperty('--camera-aspect', String(width / height));
+}
 
-const canvas =
-  document.createElement('canvas');
+function syncLiveViewportAspect() {
+  const w = video.videoWidth;
+  const h = video.videoHeight;
+  if (!w || !h) return;
 
-const cameraLoader =
-  document.getElementById('cameraLoader');
-
-const loaderSpinner =
-  document.getElementById('loaderSpinner');
-
-const loaderTitle =
-  document.getElementById('loaderTitle');
-
-const loaderSubtitle =
-  document.getElementById('loaderSubtitle');
-
-const loaderRetry =
-  document.getElementById('loaderRetry');
-
-const carousel =
-  document.getElementById('carousel');
-
-const captureBtn =
-  document.getElementById('captureBtn');
-
-const btnRetake =
-  document.getElementById('btnRetake');
-
-const btnSend =
-  document.getElementById('btnSend');
-
-const btnEmpty =
-  document.getElementById('btnEmpty');
-
-const cameraActions =
-  document.getElementById('cameraActions');
-
-const previewActions =
-  document.getElementById('previewActions');
-
-const carouselWrap =
-  document.getElementById('carouselWrap');
-
-const roomBadge =
-  document.getElementById('roomBadge');
-
-const queueCount =
-  document.getElementById('queueCount');
-
-const message =
-  document.getElementById('message');
-
-const descRoomTitle =
-  document.getElementById('descRoomTitle');
-
-const descRoomTag =
-  document.getElementById('descRoomTag');
-
-const btnCloseSheet =
-  document.getElementById('btnCloseSheet');
-
-const sheetOverlay =
-  document.getElementById('sheetOverlay');
-
-const bottomSheet =
-  document.getElementById('bottomSheet');
-
-const sheetContent =
-  document.getElementById('sheetContent');
-
-const sheetSearch =
-  document.getElementById('sheetSearch');
-
-const sheetHandleArea =
-  document.getElementById('sheetHandleArea');
-
-const sheetPeekTitle =
-  document.getElementById('sheetPeekTitle');
-
-const sheetSubtitle =
-  document.getElementById('sheetSubtitle');
-
-
-/* =========================================================
-   State
-   ========================================================= */
+  const angle = getCaptureOrientationAngle();
+  if (angle === 90 || angle === 270) {
+    setViewportAspect(h, w);
+  } else {
+    setViewportAspect(w, h);
+  }
+}
 
 let stream = null;
-
 let videoTrack = null;
-
 let imageCapture = null;
-
 let nativeFlashSupported = false;
-
-let selectedRoom =
-  ALL_ROOMS[0];
-
+let selectedRoom = ALL_ROOMS[0];
 let previewUrl = null;
-
 let snapTimer = null;
-
 let messageTimer = null;
-
 let isCapturing = false;
-
 let isPreview = false;
-
 let isVKReady = false;
 
-
-/* =========================================================
-   General helpers
-   ========================================================= */
-
 function updateQueueDisplay() {
-
-  queueCount.textContent =
-    `В очереди: ${queueRemaining} номеров`;
-
+  queueCount.textContent = `В очереди: ${queueRemaining} номеров`;
 }
 
-function showMessage(
-  text,
-  duration = 1800
-) {
-
+function showMessage(text, duration = 1800) {
   message.textContent = text;
-
-  message.classList.add(
-    'visible'
-  );
-
+  message.classList.add('visible');
   clearTimeout(messageTimer);
-
-  messageTimer =
-    setTimeout(
-      () =>
-        message.classList.remove(
-          'visible'
-        ),
-      duration
-    );
-
+  messageTimer = setTimeout(() => message.classList.remove('visible'), duration);
 }
 
-function setBusy(
-  button,
-  busy
-) {
-
-  button.classList.toggle(
-    'busy',
-    busy
-  );
-
-  button.setAttribute(
-    'aria-busy',
-    String(busy)
-  );
-
+function setBusy(button, busy) {
+  button.classList.toggle('busy', busy);
+  button.setAttribute('aria-busy', String(busy));
 }
-
-
-/* =========================================================
-   VK
-   ========================================================= */
 
 async function initVK() {
-
   try {
-
-    await bridge.send(
-      'VKWebAppInit'
-    );
-
+    await bridge.send('VKWebAppInit');
     isVKReady = true;
-
-  } catch (_) {
-
-    isVKReady = false;
-
-  }
-
+  } catch (_) { isVKReady = false; }
 }
 
 async function triggerHaptic() {
-
   try {
-
-    if (
-      isVKReady &&
-      bridge.supports(
-        'VKWebAppTapticSelectionChanged'
-      )
-    ) {
-
-      await bridge.send(
-        'VKWebAppTapticSelectionChanged'
-      );
-
+    if (isVKReady && bridge.supports('VKWebAppTapticSelectionChanged')) {
+      await bridge.send('VKWebAppTapticSelectionChanged');
       return;
-
     }
-
   } catch (_) {}
-
   try {
-
-    if (
-      navigator.vibrate
-    ) {
-
-      navigator.vibrate(8);
-
-    }
-
+    if (navigator.vibrate) navigator.vibrate(8);
   } catch (_) {}
-
 }
 
-
-/* =========================================================
-   iOS orientation permission
-   ========================================================= */
-
 async function ensureOrientationSensorPermission() {
-
   try {
-
     if (
       typeof window.DeviceOrientationEvent !== 'undefined' &&
       typeof window.DeviceOrientationEvent.requestPermission === 'function'
     ) {
-
-      const state =
-        await window.DeviceOrientationEvent
-          .requestPermission();
-
+      const state = await window.DeviceOrientationEvent.requestPermission();
       return state === 'granted';
-
     }
-
   } catch (_) {}
-
   return true;
-
 }
 
-
-/* =========================================================
-   Camera capture helpers
-   ========================================================= */
-
+/* Camera capture helpers */
 function wait(ms) {
-
-  return new Promise(
-    resolve =>
-      setTimeout(resolve, ms)
-  );
-
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 function waitForVideoFrame() {
-
   return new Promise(resolve => {
-
-    if (
-      typeof video.requestVideoFrameCallback ===
-      'function'
-    ) {
-
-      video.requestVideoFrameCallback(
-        () => resolve()
-      );
-
+    if (typeof video.requestVideoFrameCallback === 'function') {
+      video.requestVideoFrameCallback(() => resolve());
     } else {
-
-      requestAnimationFrame(
-        () =>
-          requestAnimationFrame(
-            resolve
-          )
-      );
-
+      requestAnimationFrame(() => requestAnimationFrame(resolve));
     }
-
   });
-
 }
 
+function buildTorchConstraints(enabled) {
+  const base = videoTrack && typeof videoTrack.getConstraints === 'function'
+    ? videoTrack.getConstraints()
+    : {};
 
-/* =========================================================
-   Torch
-   ========================================================= */
+  const advanced = Array.isArray(base.advanced)
+    ? base.advanced.filter(item => !Object.prototype.hasOwnProperty.call(item, 'torch'))
+    : [];
 
-function buildTorchConstraints(
-  enabled
-) {
+  advanced.push({ torch: enabled });
 
-  const base =
-    videoTrack &&
-    typeof videoTrack.getConstraints ===
-    'function'
-      ? videoTrack.getConstraints()
-      : {};
-
-  const advanced =
-    Array.isArray(base.advanced)
-      ? base.advanced.filter(
-          item =>
-            !Object.prototype.hasOwnProperty.call(
-              item,
-              'torch'
-            )
-        )
-      : [];
-
-  advanced.push({
-    torch: enabled
-  });
-
-  return {
-    ...base,
-    advanced
-  };
-
+  return { ...base, advanced };
 }
 
-async function setTorch(
-  enabled
-) {
-
-  if (
-    !videoTrack ||
-    typeof videoTrack.getCapabilities !==
-    'function'
-  ) {
-
-    return false;
-
-  }
+async function setTorch(enabled) {
+  if (!videoTrack || typeof videoTrack.getCapabilities !== 'function') return false;
 
   try {
+    const caps = videoTrack.getCapabilities();
+    if (!caps || caps.torch !== true) return false;
 
-    const caps =
-      videoTrack.getCapabilities();
-
-    if (
-      !caps ||
-      caps.torch !== true
-    ) {
-
-      return false;
-
-    }
-
-    await videoTrack.applyConstraints(
-      buildTorchConstraints(
-        enabled
-      )
-    );
-
+    await videoTrack.applyConstraints(buildTorchConstraints(enabled));
     return true;
-
   } catch (_) {
-
     return false;
-
   }
-
 }
 
-
-/* =========================================================
-   Torch fallback capture
-   ========================================================= */
-
-async function captureWithTorch(
-  angle
-) {
-
-  const torchEnabled =
-    await setTorch(true);
+/* Fallback for browsers without native still-photo flash:
+   enable the rear-camera torch, let exposure settle, capture the frame,
+   then turn it off immediately. */
+async function captureWithTorch(angle) {
+  const torchEnabled = await setTorch(true);
 
   if (torchEnabled) {
-
-    /*
-      Даём светодиоду включиться,
-      камере — перестроить экспозицию,
-      и только затем берём кадр.
-    */
-
-    await wait(280);
-
+    await wait(180);
     await waitForVideoFrame();
-
   }
 
   try {
-
-    return drawRotatedVideoToCanvas(
-      angle
-    );
-
+    const frameCanvas = drawRotatedVideoToCanvas(angle);
+    return await canvasToBlob(frameCanvas);
   } finally {
-
     if (torchEnabled) {
-
-      await wait(40);
-
       await setTorch(false);
-
     }
-
   }
-
 }
-
-
-/* =========================================================
-   Native ImageCapture
-   ========================================================= */
 
 async function getNativePhotoCapabilities() {
-
   imageCapture = null;
-
   nativeFlashSupported = false;
 
-  if (
-    !videoTrack ||
-    typeof window.ImageCapture !==
-    'function'
-  ) {
-
-    return;
-
-  }
+  if (!videoTrack || typeof window.ImageCapture !== 'function') return;
 
   try {
+    imageCapture = new window.ImageCapture(videoTrack);
+    const capabilities = await imageCapture.getPhotoCapabilities();
 
-    imageCapture =
-      new window.ImageCapture(
-        videoTrack
-      );
-
-    const capabilities =
-      await imageCapture.getPhotoCapabilities();
-
-    nativeFlashSupported =
-      Array.isArray(
-        capabilities?.fillLightMode
-      ) &&
-      capabilities.fillLightMode.includes(
-        'flash'
-      );
-
+    nativeFlashSupported = Array.isArray(capabilities?.fillLightMode)
+      && capabilities.fillLightMode.includes('flash');
   } catch (_) {
-
     imageCapture = null;
-
     nativeFlashSupported = false;
-
   }
-
 }
 
-async function captureWithNativeFlash(
-  angle
-) {
-
-  if (
-    !imageCapture ||
-    !nativeFlashSupported
-  ) {
-
-    return null;
-
-  }
+/* Native camera exposure is preferred because the browser can synchronize
+   the physical flash with the actual still-photo exposure. */
+async function captureWithNativeFlash(angle) {
+  if (!imageCapture || !nativeFlashSupported) return null;
 
   try {
-
-    const blob =
-      await imageCapture.takePhoto({
-        fillLightMode: 'flash'
-      });
-
-    if (
-      !(blob instanceof Blob) ||
-      blob.size === 0
-    ) {
-
-      return null;
-
-    }
-
-    return await normalizeCapturedBlob(
-      blob,
-      angle
-    );
-
+    const blob = await imageCapture.takePhoto({ fillLightMode: 'flash' });
+    if (!(blob instanceof Blob) || !blob.size) return null;
+    return blob;
   } catch (_) {
-
     return null;
-
   }
-
 }
 
-
-/* =========================================================
-   Camera stream
-   ========================================================= */
-
+/* Camera Stream Control */
 async function stopCamera() {
-
   if (stream) {
-
-    for (
-      const track of stream.getTracks()
-    ) {
-
-      try {
-
-        track.stop();
-
-      } catch (_) {}
-
+    for (const track of stream.getTracks()) {
+      try { track.stop(); } catch (_) {}
     }
-
   }
-
   stream = null;
-
   videoTrack = null;
-
   imageCapture = null;
-
   nativeFlashSupported = false;
-
   video.srcObject = null;
-
-  video.classList.remove(
-    'ready'
-  );
-
+  video.classList.remove('ready');
 }
 
 async function startCamera() {
-
-  cameraLoader.classList.remove(
-    'error',
-    'hidden'
-  );
-
+  cameraLoader.classList.remove('error', 'hidden');
   cameraLoader.style.opacity = '1';
-
-  loaderSpinner.classList.remove(
-    'hidden'
-  );
-
-  loaderRetry.classList.add(
-    'hidden'
-  );
-
-  loaderTitle.textContent =
-    'Запуск камеры…';
+  loaderSpinner.classList.remove('hidden');
+  loaderRetry.classList.add('hidden');
+  loaderTitle.textContent = 'Запуск камеры…';
 
   await stopCamera();
 
   try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1440 } }
+    });
 
-    stream =
-      await navigator.mediaDevices
-        .getUserMedia({
-          audio: false,
-
-          video: {
-            facingMode: {
-              ideal: 'environment'
-            },
-
-            width: {
-              ideal: 1920
-            },
-
-            height: {
-              ideal: 1440
-            }
-          }
-        });
-
-    videoTrack =
-      stream.getVideoTracks()[0] ||
-      null;
-
-    video.srcObject =
-      stream;
+    videoTrack = stream.getVideoTracks()[0] || null;
+    video.srcObject = stream;
 
     await video.play();
+    syncLiveViewportAspect();
+    video.classList.add('ready');
 
-    video.classList.add(
-      'ready'
-    );
-
-    /*
-      Возможности still-photo доступны
-      только после фактического запуска камеры.
-    */
-
+    // Capabilities become available only after the track is actually streaming.
     await getNativePhotoCapabilities();
 
-    cameraLoader.style.opacity =
-      '0';
-
-    setTimeout(
-      () =>
-        cameraLoader.classList.add(
-          'hidden'
-        ),
-      200
-    );
-
+    cameraLoader.style.opacity = '0';
+    setTimeout(() => cameraLoader.classList.add('hidden'), 200);
   } catch (error) {
-
-    cameraLoader.classList.add(
-      'error'
-    );
-
-    loaderSpinner.classList.add(
-      'hidden'
-    );
-
-    loaderRetry.classList.remove(
-      'hidden'
-    );
-
-    loaderTitle.textContent =
-      'Не удалось открыть камеру';
-
+    cameraLoader.classList.add('error');
+    loaderSpinner.classList.add('hidden');
+    loaderRetry.classList.remove('hidden');
+    loaderTitle.textContent = 'Не удалось открыть камеру';
   }
-
 }
 
+/* Correct photo orientation on Canvas.
+   The pixels themselves are rotated; the resulting JPEG does not depend
+   on the phone's later orientation or on EXIF metadata. */
+function drawRotatedVideoToCanvas(angle = getCaptureOrientationAngle()) {
+  const vW = video.videoWidth;
+  const vH = video.videoHeight;
+  if (!vW || !vH) throw new Error('Frame error');
 
-/* =========================================================
-   Canvas rotation
-   ========================================================= */
+  angle = normalizeAngle(angle);
 
-function drawRotatedVideoToCanvas(
-  angle = getCaptureOrientationAngle()
-) {
-
-  const vW =
-    video.videoWidth;
-
-  const vH =
-    video.videoHeight;
-
-  if (
-    !vW ||
-    !vH
-  ) {
-
-    throw new Error(
-      'Frame error'
-    );
-
-  }
-
-  angle =
-    normalizeAngle(angle);
-
-  if (
-    angle === 90 ||
-    angle === 270
-  ) {
-
-    canvas.width =
-      vH;
-
-    canvas.height =
-      vW;
-
+  if (angle === 90 || angle === 270) {
+    canvas.width = vH;
+    canvas.height = vW;
   } else {
-
-    canvas.width =
-      vW;
-
-    canvas.height =
-      vH;
-
+    canvas.width = vW;
+    canvas.height = vH;
   }
 
-  const ctx =
-    canvas.getContext(
-      '2d',
-      {
-        alpha: false
-      }
-    );
-
-  ctx.fillStyle =
-    '#000';
-
-  ctx.fillRect(
-    0,
-    0,
-    canvas.width,
-    canvas.height
-  );
-
+  const ctx = canvas.getContext('2d', { alpha: false });
   ctx.save();
 
   if (angle === 90) {
-
-    ctx.translate(
-      vH,
-      0
-    );
-
-    ctx.rotate(
-      90 * Math.PI / 180
-    );
-
-  } else if (
-    angle === 180
-  ) {
-
-    ctx.translate(
-      vW,
-      vH
-    );
-
-    ctx.rotate(
-      180 * Math.PI / 180
-    );
-
-  } else if (
-    angle === 270
-  ) {
-
-    ctx.translate(
-      0,
-      vW
-    );
-
-    ctx.rotate(
-      270 * Math.PI / 180
-    );
-
+    ctx.translate(vH, 0);
+    ctx.rotate(Math.PI / 2);
+  } else if (angle === 180) {
+    ctx.translate(vW, vH);
+    ctx.rotate(Math.PI);
+  } else if (angle === 270) {
+    ctx.translate(0, vW);
+    ctx.rotate(-Math.PI / 2);
   }
 
-  ctx.drawImage(
-    video,
-    0,
-    0,
-    vW,
-    vH
-  );
-
+  ctx.drawImage(video, 0, 0, vW, vH);
   ctx.restore();
 
-  /*
-    Получаем уже физически повёрнутый JPEG.
-    EXIF для последующей ориентации не нужен.
-  */
-
-  return canvas.toDataURL(
-    'image/jpeg',
-    0.92
-  );
-
+  return canvas;
 }
 
-
-/* =========================================================
-   Normalize native ImageCapture photo
-   ========================================================= */
-
-async function normalizeCapturedBlob(
-  blob,
-  angle
-) {
-
-  const bitmap =
-    await createImageBitmap(blob);
-
-  const w =
-    bitmap.width;
-
-  const h =
-    bitmap.height;
-
-  const wantLandscape =
-    angle === 90 ||
-    angle === 270;
-
-  const isLandscape =
-    w > h;
-
-  let rotation = 0;
-
-  /*
-    Не вращаем уже правильно ориентированный
-    нативный снимок.
-
-    Если ориентация и соотношение сторон
-    противоречат друг другу — делаем quarter-turn.
-  */
-
-  if (
-    wantLandscape &&
-    !isLandscape
-  ) {
-
-    rotation =
-      angle === 90
-        ? 90
-        : 270;
-
-  } else if (
-    !wantLandscape &&
-    isLandscape
-  ) {
-
-    rotation =
-      angle === 180
-        ? 270
-        : 90;
-
-  }
-
-  if (
-    rotation === 0
-  ) {
-
-    if (
-      typeof bitmap.close ===
-      'function'
-    ) {
-
-      bitmap.close();
-
-    }
-
-    return blob;
-
-  }
-
-  const targetCanvas =
-    document.createElement(
-      'canvas'
+function canvasToBlob(sourceCanvas) {
+  return new Promise((resolve, reject) => {
+    sourceCanvas.toBlob(
+      blob => blob && blob.size
+        ? resolve(blob)
+        : reject(new Error('Photo encode error')),
+      'image/jpeg',
+      0.92
     );
-
-  const radians =
-    rotation *
-    Math.PI /
-    180;
-
-  if (
-    rotation === 90 ||
-    rotation === 270
-  ) {
-
-    targetCanvas.width =
-      h;
-
-    targetCanvas.height =
-      w;
-
-  } else {
-
-    targetCanvas.width =
-      w;
-
-    targetCanvas.height =
-      h;
-
-  }
-
-  const ctx =
-    targetCanvas.getContext(
-      '2d',
-      {
-        alpha: false
-      }
-    );
-
-  ctx.fillStyle =
-    '#000';
-
-  ctx.fillRect(
-    0,
-    0,
-    targetCanvas.width,
-    targetCanvas.height
-  );
-
-  ctx.save();
-
-  if (
-    rotation === 90
-  ) {
-
-    ctx.translate(
-      h,
-      0
-    );
-
-  } else if (
-    rotation === 180
-  ) {
-
-    ctx.translate(
-      w,
-      h
-    );
-
-  } else if (
-    rotation === 270
-  ) {
-
-    ctx.translate(
-      0,
-      w
-    );
-
-  }
-
-  ctx.rotate(
-    radians
-  );
-
-  ctx.drawImage(
-    bitmap,
-    0,
-    0,
-    w,
-    h
-  );
-
-  ctx.restore();
-
-  if (
-    typeof bitmap.close ===
-    'function'
-  ) {
-
-    bitmap.close();
-
-  }
-
-  const normalized =
-    await new Promise(
-      (resolve, reject) => {
-
-        targetCanvas.toBlob(
-          result =>
-            result
-              ? resolve(result)
-              : reject(
-                  new Error(
-                    'Photo encode error'
-                  )
-                ),
-
-          'image/jpeg',
-
-          0.94
-        );
-
-      }
-    );
-
-  return normalized;
-
+  });
 }
-
-
-/* =========================================================
-   Preview
-   ========================================================= */
 
 function releasePreviewUrl() {
-
   if (previewUrl) {
-
-    URL.revokeObjectURL(
-      previewUrl
-    );
-
+    URL.revokeObjectURL(previewUrl);
     previewUrl = null;
-
   }
-
 }
 
-function showPreview(
-  source
-) {
-
+function showPreview(source) {
   releasePreviewUrl();
 
-  if (
-    source instanceof Blob
-  ) {
+  photo.onload = () => {
+    setViewportAspect(photo.naturalWidth, photo.naturalHeight);
+  };
 
-    previewUrl =
-      URL.createObjectURL(
-        source
-      );
-
-    photo.src =
-      previewUrl;
-
+  if (source instanceof Blob) {
+    previewUrl = URL.createObjectURL(source);
+    photo.src = previewUrl;
   } else {
-
-    photo.src =
-      source;
-
+    photo.src = source;
   }
 
-  video.classList.remove(
-    'ready'
-  );
+  video.classList.remove('ready');
+  video.classList.add('hidden');
+  photo.classList.remove('hidden');
 
-  video.classList.add(
-    'hidden'
-  );
-
-  photo.classList.remove(
-    'hidden'
-  );
-
-  cameraActions.classList.add(
-    'hidden'
-  );
-
-  previewActions.classList.remove(
-    'hidden'
-  );
-
-  carouselWrap.classList.add(
-    'disabled'
-  );
+  cameraActions.classList.add('hidden');
+  previewActions.classList.remove('hidden');
+  carouselWrap.classList.add('disabled');
 
   isPreview = true;
-
 }
+
+photo.onerror = () => showMessage('Не удалось открыть снимок');
 
 function resetPhoto() {
-
   isPreview = false;
+  previewActions.classList.add('hidden');
+  cameraActions.classList.remove('hidden');
+  carouselWrap.classList.remove('disabled');
 
-  previewActions.classList.add(
-    'hidden'
-  );
-
-  cameraActions.classList.remove(
-    'hidden'
-  );
-
-  carouselWrap.classList.remove(
-    'disabled'
-  );
-
-  photo.classList.add(
-    'hidden'
-  );
-
-  photo.removeAttribute(
-    'src'
-  );
+  photo.classList.add('hidden');
+  photo.removeAttribute('src');
 
   releasePreviewUrl();
-
-  video.classList.remove(
-    'hidden'
-  );
-
-  video.classList.add(
-    'ready'
-  );
-
-  try {
-
-    video.play();
-
-  } catch (_) {}
-
+  video.classList.remove('hidden');
+  video.classList.add('ready');
+  syncLiveViewportAspect();
+  try { video.play(); } catch (_) {}
 }
 
-
-/* =========================================================
-   Carousel
-   ========================================================= */
-
+/* Carousel */
 function buildCarousel() {
+  carousel.innerHTML = '';
+  const fragment = document.createDocumentFragment();
 
-  carousel.innerHTML =
-    '';
+  ALL_ROOMS.forEach(room => {
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'num-item';
+    el.dataset.number = room.number;
+    el.textContent = room.number;
+    fragment.appendChild(el);
+  });
 
-  const fragment =
-    document.createDocumentFragment();
+  carousel.appendChild(fragment);
 
-  ALL_ROOMS.forEach(
-    room => {
+  const totalSuites = ALL_ROOMS.filter(r => r.type === 'suite').length;
+  const totalStds = ALL_ROOMS.length - totalSuites;
+  sheetPeekTitle.textContent = `Показать все номера (${ALL_ROOMS.length})`;
+  sheetSubtitle.textContent = `${ALL_ROOMS.length} номеров (${totalSuites} люксов, ${totalStds} стандартов)`;
 
-      const el =
-        document.createElement(
-          'button'
-        );
-
-      el.type =
-        'button';
-
-      el.className =
-        'num-item';
-
-      el.dataset.number =
-        room.number;
-
-      el.textContent =
-        room.number;
-
-      fragment.appendChild(
-        el
-      );
-
-    }
-  );
-
-  carousel.appendChild(
-    fragment
-  );
-
-  const totalSuites =
-    ALL_ROOMS.filter(
-      r =>
-        r.type === 'suite'
-    ).length;
-
-  const totalStds =
-    ALL_ROOMS.length -
-    totalSuites;
-
-  sheetPeekTitle.textContent =
-    `Показать все номера (${ALL_ROOMS.length})`;
-
-  sheetSubtitle.textContent =
-    `${ALL_ROOMS.length} номеров (${totalSuites} люксов, ${totalStds} стандартов)`;
-
-  requestAnimationFrame(
-    () =>
-      selectRoomByNumber(
-        ALL_ROOMS[0].number,
-        false,
-        'auto'
-      )
-  );
-
+  requestAnimationFrame(() => {
+    selectRoomByNumber(ALL_ROOMS[0].number, false, 'auto');
+  });
 }
 
-function updateSelectedRoomState(
-  room,
-  vibrate = false
-) {
-
+function updateSelectedRoomState(room, vibrate = false) {
   if (!room) return;
+  const changed = selectedRoom !== room;
+  selectedRoom = room;
 
-  const changed =
-    selectedRoom !== room;
+  const items = carousel.querySelectorAll('.num-item');
+  items.forEach(item => {
+    const isCur = item.dataset.number === room.number;
+    item.classList.toggle('active', isCur);
+  });
 
-  selectedRoom =
-    room;
+  descRoomTitle.textContent = `Номер ${room.number}`;
+  const isSuite = room.type === 'suite';
+  descRoomTag.textContent = `${isSuite ? 'Люкс' : 'Стандарт'} • ${room.floor} этаж`;
+  descRoomTag.className = `desc-tag ${isSuite ? 'suite' : ''}`;
 
-  const items =
-    carousel.querySelectorAll(
-      '.num-item'
-    );
-
-  items.forEach(
-    item => {
-
-      const isCur =
-        item.dataset.number ===
-        room.number;
-
-      item.classList.toggle(
-        'active',
-        isCur
-      );
-
-    }
-  );
-
-  roomBadge.textContent =
-    `№ ${room.number}`;
-
-  descRoomTitle.textContent =
-    `Номер ${room.number}`;
-
-  const isSuite =
-    room.type ===
-    'suite';
-
-  descRoomTag.textContent =
-    `${isSuite ? 'Люкс' : 'Стандарт'} • ${room.floor} этаж`;
-
-  descRoomTag.className =
-    `desc-tag ${isSuite ? 'suite' : ''}`;
-
-  updateDrawerSelectedChip(
-    room.number
-  );
-
-  if (
-    vibrate &&
-    changed
-  ) {
-
-    triggerHaptic();
-
-  }
-
+  updateDrawerSelectedChip(room.number);
+  if (vibrate && changed) triggerHaptic();
 }
 
-function selectRoomByNumber(
-  numStr,
-  vibrate = true,
-  behavior = 'smooth'
-) {
-
-  const room =
-    ALL_ROOMS.find(
-      r =>
-        r.number ===
-        String(numStr)
-    );
-
+function selectRoomByNumber(numStr, vibrate = true, behavior = 'smooth') {
+  const room = ALL_ROOMS.find(r => r.number === String(numStr));
   if (!room) return;
 
-  const el =
-    carousel.querySelector(
-      `[data-number="${room.number}"]`
-    );
-
+  const el = carousel.querySelector(`[data-number="${room.number}"]`);
   if (el) {
-
-    updateSelectedRoomState(
-      room,
-      vibrate
-    );
-
-    el.scrollIntoView({
-      behavior,
-      inline: 'center',
-      block: 'nearest'
-    });
-
+    updateSelectedRoomState(room, vibrate);
+    el.scrollIntoView({ behavior, inline: 'center', block: 'nearest' });
   }
-
 }
 
 function updateNumberFromScroll() {
+  const items = carousel.querySelectorAll('.num-item');
+  if (!items.length) return;
 
-  const items =
-    carousel.querySelectorAll(
-      '.num-item'
-    );
-
-  if (!items.length)
-    return;
-
-  const carouselRect =
-    carousel.getBoundingClientRect();
-
-  const center =
-    carouselRect.left +
-    carouselRect.width / 2;
+  const carouselRect = carousel.getBoundingClientRect();
+  const center = carouselRect.left + carouselRect.width / 2;
 
   let closest = null;
+  let minDistance = Infinity;
 
-  let minDistance =
-    Infinity;
+  items.forEach(el => {
+    const rect = el.getBoundingClientRect();
+    const itemCenter = rect.left + rect.width / 2;
+    const distance = Math.abs(itemCenter - center);
 
-  items.forEach(
-    el => {
-
-      const rect =
-        el.getBoundingClientRect();
-
-      const itemCenter =
-        rect.left +
-        rect.width / 2;
-
-      const distance =
-        Math.abs(
-          itemCenter -
-          center
-        );
-
-      if (
-        distance <
-        minDistance
-      ) {
-
-        minDistance =
-          distance;
-
-        closest =
-          el;
-
-      }
-
+    if (distance < minDistance) {
+      minDistance = distance;
+      closest = el;
     }
-  );
+  });
 
   if (closest) {
-
-    const room =
-      ALL_ROOMS.find(
-        r =>
-          r.number ===
-          closest.dataset.number
-      );
-
-    if (room) {
-
-      updateSelectedRoomState(
-        room,
-        true
-      );
-
-    }
-
+    const room = ALL_ROOMS.find(r => r.number === closest.dataset.number);
+    if (room) updateSelectedRoomState(room, true);
   }
-
 }
 
-carousel.addEventListener(
-  'scroll',
-  () => {
+carousel.addEventListener('scroll', () => {
+  updateNumberFromScroll();
+  clearTimeout(snapTimer);
+  snapTimer = setTimeout(() => updateNumberFromScroll(), 80);
+}, { passive: true });
 
-    updateNumberFromScroll();
+carousel.addEventListener('click', event => {
+  const item = event.target.closest('.num-item');
+  if (!item) return;
+  selectRoomByNumber(item.dataset.number);
+});
 
-    clearTimeout(
-      snapTimer
-    );
-
-    snapTimer =
-      setTimeout(
-        () =>
-          updateNumberFromScroll(),
-        80
-      );
-
-  },
-  {
-    passive: true
-  }
-);
-
-carousel.addEventListener(
-  'click',
-  event => {
-
-    const item =
-      event.target.closest(
-        '.num-item'
-      );
-
-    if (!item)
-      return;
-
-    selectRoomByNumber(
-      item.dataset.number
-    );
-
-  }
-);
-
-
-/* =========================================================
-   Bottom Sheet
-   ========================================================= */
-
+/* Bottom Sheet Drawer */
 let isSheetOpen = false;
-
 let startY = 0;
-
 let currentY = 0;
-
 let isDragging = false;
-
-let sheetHeight =
-  window.innerHeight * 0.82;
-
+let sheetHeight = window.innerHeight * 0.82;
 let rafId = null;
 
-function renderDrawerRooms(
-  filterQuery = ''
-) {
-
-  sheetContent.innerHTML =
-    '';
-
-  const q =
-    filterQuery
-      .trim()
-      .toLowerCase();
-
-  const floors = [
-    5, 6, 7, 8, 9,
-    10, 11, 12, 13,
-    14, 15, 16, 17,
-    18, 19
-  ];
+function renderDrawerRooms(filterQuery = '') {
+  sheetContent.innerHTML = '';
+  const q = filterQuery.trim().toLowerCase();
+  const floors = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
 
   let hasAny = false;
 
-  floors.forEach(
-    floorNum => {
+  floors.forEach(floorNum => {
+    let floorRooms = ALL_ROOMS.filter(r => r.floor === floorNum);
+    if (q) floorRooms = floorRooms.filter(r => r.number.toLowerCase().includes(q));
 
-      let floorRooms =
-        ALL_ROOMS.filter(
-          r =>
-            r.floor ===
-            floorNum
-        );
+    if (floorRooms.length === 0) return;
+    hasAny = true;
 
-      if (q) {
+    const suitesCount = floorRooms.filter(r => r.type === 'suite').length;
+    const stdsCount = floorRooms.filter(r => r.type === 'standard').length;
 
-        floorRooms =
-          floorRooms.filter(
-            r =>
-              r.number
-                .toLowerCase()
-                .includes(q)
-          );
+    const section = document.createElement('div');
+    section.className = 'floor-section';
 
-      }
-
-      if (
-        floorRooms.length ===
-        0
-      ) {
-        return;
-      }
-
-      hasAny = true;
-
-      const suitesCount =
-        floorRooms.filter(
-          r =>
-            r.type === 'suite'
-        ).length;
-
-      const stdsCount =
-        floorRooms.length -
-        suitesCount;
-
-      const section =
-        document.createElement(
-          'div'
-        );
-
-      section.className =
-        'floor-section';
-
-      const header =
-        document.createElement(
-          'div'
-        );
-
-      header.className =
-        'floor-header';
-
-      header.innerHTML = `
-        <span>${floorNum} этаж</span>
-        <span class="floor-stats">
-          ${floorRooms.length} номеров
-          (${suitesCount > 0 ? suitesCount + ' люкс' : ''}
-          ${suitesCount > 0 && stdsCount > 0 ? ', ' : ''}
-          ${stdsCount > 0 ? stdsCount + ' станд.' : ''})
-        </span>
-      `;
-
-      const grid =
-        document.createElement(
-          'div'
-        );
-
-      grid.className =
-        'room-grid';
-
-      floorRooms.forEach(
-        room => {
-
-          const chip =
-            document.createElement(
-              'div'
-            );
-
-          chip.className =
-            `room-chip ${
-              room.type === 'suite'
-                ? 'suite'
-                : ''
-            } ${
-              room.number === selectedRoom?.number
-                ? 'selected'
-                : ''
-            }`;
-
-          chip.dataset.roomNumber =
-            room.number;
-
-          chip.innerHTML = `
-            <span>${room.number}</span>
-            <span class="chip-type">
-              ${
-                room.type === 'suite'
-                  ? 'Люкс'
-                  : 'Ст.'
-              }
-            </span>
-          `;
-
-          chip.addEventListener(
-            'click',
-            () => {
-
-              selectRoomByNumber(
-                room.number,
-                true
-              );
-
-              closeSheet();
-
-            }
-          );
-
-          grid.appendChild(
-            chip
-          );
-
-        }
-      );
-
-      section.appendChild(
-        header
-      );
-
-      section.appendChild(
-        grid
-      );
-
-      sheetContent.appendChild(
-        section
-      );
-
-    }
-  );
-
-  if (!hasAny) {
-
-    sheetContent.innerHTML = `
-      <div
-        style="
-          text-align: center;
-          color: var(--text-dim);
-          padding: 40px 0;
-        "
-      >
-        Номера не найдены
-      </div>
+    const header = document.createElement('div');
+    header.className = 'floor-header';
+    header.innerHTML = `
+      <span>${floorNum} этаж</span>
+      <span class="floor-stats">${floorRooms.length} номеров (${suitesCount > 0 ? suitesCount + ' люкс' : ''}${suitesCount > 0 && stdsCount > 0 ? ', ' : ''}${stdsCount > 0 ? stdsCount + ' станд.' : ''})</span>
     `;
 
-  }
+    const grid = document.createElement('div');
+    grid.className = 'room-grid';
 
+    floorRooms.forEach(room => {
+      const chip = document.createElement('div');
+      chip.className = `room-chip ${room.type === 'suite' ? 'suite' : ''} ${room.number === selectedRoom?.number ? 'selected' : ''}`;
+      chip.dataset.roomNumber = room.number;
+      chip.innerHTML = `
+        <span>${room.number}</span>
+        <span class="chip-type">${room.type === 'suite' ? 'Люкс' : 'Ст.'}</span>
+      `;
+
+      chip.addEventListener('click', () => {
+        selectRoomByNumber(room.number, true);
+        closeSheet();
+      });
+
+      grid.appendChild(chip);
+    });
+
+    section.appendChild(header);
+    section.appendChild(grid);
+    sheetContent.appendChild(section);
+  });
+
+  if (!hasAny) {
+    sheetContent.innerHTML = `<div style="text-align: center; color: var(--text-dim); padding: 40px 0;">Номера не найдены</div>`;
+  }
 }
 
-function updateDrawerSelectedChip(
-  numStr
-) {
-
-  const chips =
-    sheetContent.querySelectorAll(
-      '.room-chip'
-    );
-
-  chips.forEach(
-    chip =>
-      chip.classList.toggle(
-        'selected',
-        chip.dataset.roomNumber ===
-        numStr
-      )
-  );
-
+function updateDrawerSelectedChip(numStr) {
+  const chips = sheetContent.querySelectorAll('.room-chip');
+  chips.forEach(chip => chip.classList.toggle('selected', chip.dataset.roomNumber === numStr));
 }
 
 function openSheet() {
-
-  isSheetOpen =
-    true;
-
-  bottomSheet.classList.remove(
-    'dragging'
-  );
-
-  sheetOverlay.classList.add(
-    'active'
-  );
-
-  bottomSheet.classList.add(
-    'open'
-  );
-
-  bottomSheet.style.transform =
-    'translate3d(0, 0, 0)';
-
+  isSheetOpen = true;
+  bottomSheet.classList.remove('dragging');
+  sheetOverlay.classList.add('active');
+  bottomSheet.classList.add('open');
+  bottomSheet.style.transform = 'translate3d(0, 0, 0)';
   triggerHaptic();
-
 }
 
 function closeSheet() {
-
-  isSheetOpen =
-    false;
-
-  bottomSheet.classList.remove(
-    'dragging'
-  );
-
-  sheetOverlay.classList.remove(
-    'active'
-  );
-
-  bottomSheet.classList.remove(
-    'open'
-  );
-
-  bottomSheet.style.transform =
-    'translate3d(0, calc(100% - 46px), 0)';
-
+  isSheetOpen = false;
+  bottomSheet.classList.remove('dragging');
+  sheetOverlay.classList.remove('active');
+  bottomSheet.classList.remove('open');
+  bottomSheet.style.transform = 'translate3d(0, calc(100% - 46px), 0)';
 }
 
 function updateSheetTransform() {
-
-  if (!isDragging)
-    return;
-
-  const deltaY =
-    currentY -
-    startY;
+  if (!isDragging) return;
+  const deltaY = currentY - startY;
 
   if (!isSheetOpen) {
-
-    if (
-      deltaY < 0
-    ) {
-
-      const translateY =
-        Math.max(
-          0,
-          sheetHeight +
-          deltaY
-        );
-
-      bottomSheet.style.transform =
-        `translate3d(0, ${translateY}px, 0)`;
-
+    if (deltaY < 0) {
+      const translateY = Math.max(0, sheetHeight + deltaY);
+      bottomSheet.style.transform = `translate3d(0, ${translateY}px, 0)`;
     }
-
   } else {
-
-    if (
-      deltaY > 0
-    ) {
-
-      bottomSheet.style.transform =
-        `translate3d(0, ${deltaY}px, 0)`;
-
+    if (deltaY > 0) {
+      bottomSheet.style.transform = `translate3d(0, ${deltaY}px, 0)`;
     }
-
   }
-
 }
 
-sheetHandleArea.addEventListener(
-  'touchstart',
-  e => {
+sheetHandleArea.addEventListener('touchstart', e => {
+  startY = e.touches[0].clientY;
+  currentY = startY;
+  isDragging = true;
+  sheetHeight = bottomSheet.offsetHeight;
+  bottomSheet.classList.add('dragging');
+}, { passive: true });
 
-    startY =
-      e.touches[0].clientY;
+window.addEventListener('touchmove', e => {
+  if (!isDragging) return;
+  currentY = e.touches[0].clientY;
+  if (rafId) cancelAnimationFrame(rafId);
+  rafId = requestAnimationFrame(updateSheetTransform);
+}, { passive: true });
 
-    currentY =
-      startY;
+window.addEventListener('touchend', () => {
+  if (!isDragging) return;
+  isDragging = false;
+  bottomSheet.classList.remove('dragging');
 
-    isDragging =
-      true;
-
-    sheetHeight =
-      bottomSheet.offsetHeight;
-
-    bottomSheet.classList.add(
-      'dragging'
-    );
-
-  },
-  {
-    passive: true
+  const deltaY = currentY - startY;
+  if (!isSheetOpen) {
+    if (deltaY < -40) openSheet();
+    else closeSheet();
+  } else {
+    if (deltaY > 50) closeSheet();
+    else openSheet();
   }
-);
+});
 
-window.addEventListener(
-  'touchmove',
-  e => {
+sheetHandleArea.addEventListener('click', () => {
+  if (isSheetOpen) closeSheet();
+  else openSheet();
+});
 
-    if (!isDragging)
-      return;
+btnCloseSheet.addEventListener('click', closeSheet);
+sheetOverlay.addEventListener('click', closeSheet);
+sheetSearch.addEventListener('input', e => renderDrawerRooms(e.target.value));
 
-    currentY =
-      e.touches[0].clientY;
-
-    if (rafId)
-      cancelAnimationFrame(
-        rafId
-      );
-
-    rafId =
-      requestAnimationFrame(
-        updateSheetTransform
-      );
-
-  },
-  {
-    passive: true
-  }
-);
-
-window.addEventListener(
-  'touchend',
-  () => {
-
-    if (!isDragging)
-      return;
-
-    isDragging =
-      false;
-
-    bottomSheet.classList.remove(
-      'dragging'
-    );
-
-    const deltaY =
-      currentY -
-      startY;
-
-    if (!isSheetOpen) {
-
-      if (
-        deltaY < -40
-      ) {
-
-        openSheet();
-
-      } else {
-
-        closeSheet();
-
-      }
-
-    } else {
-
-      if (
-        deltaY > 50
-      ) {
-
-        closeSheet();
-
-      } else {
-
-        openSheet();
-
-      }
-
-    }
-
-  }
-);
-
-sheetHandleArea.addEventListener(
-  'click',
-  () => {
-
-    if (isSheetOpen) {
-
-      closeSheet();
-
-    } else {
-
-      openSheet();
-
-    }
-
-  }
-);
-
-btnCloseSheet.addEventListener(
-  'click',
-  closeSheet
-);
-
-sheetOverlay.addEventListener(
-  'click',
-  closeSheet
-);
-
-sheetSearch.addEventListener(
-  'input',
-  e =>
-    renderDrawerRooms(
-      e.target.value
-    )
-);
-
-
-/* =========================================================
-   Photo Actions
-   ========================================================= */
-
+/* Actions */
 async function takePhoto() {
+  if (isCapturing || isPreview || !videoTrack) return;
 
-  if (
-    isCapturing ||
-    isPreview ||
-    !videoTrack
-  ) {
-
-    return;
-
-  }
-
-  isCapturing =
-    true;
-
-  setBusy(
-    captureBtn,
-    true
-  );
+  isCapturing = true;
+  setBusy(captureBtn, true);
 
   try {
-
-    /*
-      На iOS разрешение датчика может
-      запрашиваться только из user gesture.
-    */
-
+    // Some iOS engines require explicit permission for DeviceOrientation.
     await ensureOrientationSensorPermission();
 
-    /*
-      Зафиксировали положение телефона
-      именно в момент нажатия.
-    */
-
-    const captureAngle =
-      getCaptureOrientationAngle();
-
-    /*
-      Сначала пробуем настоящий single-exposure
-      со вспышкой через ImageCapture.
-
-      Если WebView / устройство не умеет
-      эту возможность — fallback torch.
-    */
+    // Freeze the physical orientation at the instant of shutter press.
+    const captureAngle = getCaptureOrientationAngle();
 
     let sourceBlob = null;
 
-    if (
-      imageCapture &&
-      nativeFlashSupported
-    ) {
-
-      sourceBlob =
-        await captureWithNativeFlash(
-          captureAngle
-        );
-
-      if (sourceBlob) {
-
-        showPreview(
-          sourceBlob
-        );
-
-      }
-
+    if (imageCapture && nativeFlashSupported) {
+      sourceBlob = await captureWithNativeFlash(captureAngle);
     }
 
     if (!sourceBlob) {
-
-      const source =
-        await captureWithTorch(
-          captureAngle
-        );
-
-      showPreview(
-        source
-      );
-
+      sourceBlob = await captureWithTorch(captureAngle);
     }
 
+    if (!sourceBlob) {
+      throw new Error('Photo capture failed');
+    }
+
+    showPreview(sourceBlob);
+
     await triggerHaptic();
-
   } catch (error) {
-
-    showMessage(
-      'Ошибка при снимке'
-    );
-
+    showMessage('Ошибка при снимке');
   } finally {
-
-    isCapturing =
-      false;
-
-    setBusy(
-      captureBtn,
-      false
-    );
-
+    isCapturing = false;
+    setBusy(captureBtn, false);
   }
-
 }
 
-captureBtn.addEventListener(
-  'click',
-  takePhoto
-);
+captureBtn.addEventListener('click', takePhoto);
+btnRetake.addEventListener('click', () => { resetPhoto(); triggerHaptic(); });
 
-btnRetake.addEventListener(
-  'click',
-  () => {
+btnSend.addEventListener('click', async () => {
+  if (!isPreview || btnSend.classList.contains('busy')) return;
 
-    resetPhoto();
+  setBusy(btnSend, true);
+  btnSend.textContent = 'Отправка…';
 
-    triggerHaptic();
+  await new Promise(r => setTimeout(r, 500));
 
-  }
-);
-
-btnSend.addEventListener(
-  'click',
-  async () => {
-
-    if (
-      !isPreview ||
-      btnSend.classList.contains(
-        'busy'
-      )
-    ) {
-
-      return;
-
-    }
-
-    setBusy(
-      btnSend,
-      true
-    );
-
-    btnSend.textContent =
-      'Отправка…';
-
-    await new Promise(
-      r =>
-        setTimeout(
-          r,
-          500
-        )
-    );
-
-    if (
-      queueRemaining >
-      0
-    ) {
-
-      queueRemaining--;
-
-    }
-
-    updateQueueDisplay();
-
-    btnSend.textContent =
-      'Отправлено';
-
-    await triggerHaptic();
-
-    setTimeout(
-      () => {
-
-        btnSend.textContent =
-          'Отправить';
-
-        setBusy(
-          btnSend,
-          false
-        );
-
-        resetPhoto();
-
-      },
-      500
-    );
-
-  }
-);
-
-btnEmpty.addEventListener(
-  'click',
-  async () => {
-
-    await triggerHaptic();
-
-    if (
-      queueRemaining >
-      0
-    ) {
-
-      queueRemaining--;
-
-    }
-
-    updateQueueDisplay();
-
-    showMessage(
-      `№ ${selectedRoom.number} помечен как «Опустошён»`
-    );
-
-  }
-);
-
-loaderRetry.addEventListener(
-  'click',
-  startCamera
-);
-
-
-/* =========================================================
-   Boot
-   ========================================================= */
-
-(async function boot() {
-
+  if (queueRemaining > 0) queueRemaining--;
   updateQueueDisplay();
 
+  btnSend.textContent = 'Отправлено';
+  await triggerHaptic();
+
+  setTimeout(() => {
+    btnSend.textContent = 'Отправить';
+    setBusy(btnSend, false);
+    resetPhoto();
+  }, 500);
+});
+
+btnEmpty.addEventListener('click', async () => {
+  await triggerHaptic();
+  if (queueRemaining > 0) queueRemaining--;
+  updateQueueDisplay();
+  showMessage(`№ ${selectedRoom.number} помечен как «Опустошён»`);
+});
+
+loaderRetry.addEventListener('click', startCamera);
+
+(async function boot() {
+  updateQueueDisplay();
   buildCarousel();
-
   renderDrawerRooms();
-
   await initVK();
-
   await startCamera();
-
 })();
 </script>
-
 </body>
 </html>
