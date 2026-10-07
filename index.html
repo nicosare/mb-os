@@ -15,7 +15,7 @@
     --card-bg: rgba(255, 255, 255, 0.06);
     --card-border: rgba(255, 255, 255, 0.10);
     --text-dim: rgba(255, 255, 255, 0.45);
-    --page-pad: 16px;
+    --page-pad: 14px;
   }
 
   * {
@@ -49,32 +49,43 @@
     position: fixed;
     inset: 0;
     width: 100%;
-    height: 100%;
     height: 100dvh;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     overflow: hidden;
     background: #000;
   }
 
-  /* Header */
+  /* Top Bar */
   .top-bar {
     position: relative;
     z-index: 10;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: calc(env(safe-area-inset-top) + 10px) 18px 10px;
+    padding: calc(env(safe-area-inset-top) + 8px) 16px 8px;
     background: #000;
+    flex-shrink: 0;
+  }
+
+  .hotel-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
   }
 
   .hotel-title {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     color: var(--text-dim);
     letter-spacing: 0.8px;
     text-transform: uppercase;
+  }
+
+  .queue-count {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
   }
 
   .room-badge {
@@ -88,29 +99,29 @@
     letter-spacing: 0.3px;
   }
 
-  /* Main View Area */
+  /* Main View Area (Flex layout to stretch camera) */
   .main-content {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
     padding: 0 var(--page-pad);
-    gap: 12px;
+    gap: 8px;
     min-height: 0;
+    overflow: hidden;
   }
 
-  /* Viewfinder */
+  /* Viewfinder (Expanded) */
   .viewport-container {
     position: relative;
     width: 100%;
-    max-width: 420px;
-    height: min(38vh, 290px);
-    border-radius: 18px;
+    max-width: 440px;
+    flex: 1;
+    min-height: 200px;
+    border-radius: 20px;
     overflow: hidden;
     background: #0b0b0d;
     border: 1px solid var(--card-border);
-    flex-shrink: 0;
   }
 
   .viewfinder {
@@ -119,7 +130,6 @@
     height: 100%;
     overflow: hidden;
     background: #0b0b0d;
-    isolation: isolate;
   }
 
   #camera, #photo {
@@ -129,7 +139,7 @@
     height: 100%;
     display: block;
     background: #0b0b0d;
-    object-fit: contain;
+    object-fit: cover;
     object-position: center;
   }
 
@@ -139,7 +149,7 @@
   }
 
   #camera.ready { opacity: 1; }
-  #photo { z-index: 2; object-fit: contain; }
+  #photo { z-index: 2; object-fit: cover; }
 
   .camera-overlay {
     position: absolute;
@@ -150,17 +160,17 @@
 
   .focus-corner {
     position: absolute;
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     border-color: rgba(255,255,255,.6);
     border-style: solid;
     border-width: 0;
   }
 
-  .focus-corner.tl { top: 12px; left: 12px; border-top-width: 2px; border-left-width: 2px; border-top-left-radius: 4px; }
-  .focus-corner.tr { top: 12px; right: 12px; border-top-width: 2px; border-right-width: 2px; border-top-right-radius: 4px; }
-  .focus-corner.bl { bottom: 12px; left: 12px; border-bottom-width: 2px; border-left-width: 2px; border-bottom-left-radius: 4px; }
-  .focus-corner.br { bottom: 12px; right: 12px; border-bottom-width: 2px; border-right-width: 2px; border-bottom-right-radius: 4px; }
+  .focus-corner.tl { top: 14px; left: 14px; border-top-width: 2px; border-left-width: 2px; border-top-left-radius: 4px; }
+  .focus-corner.tr { top: 14px; right: 14px; border-top-width: 2px; border-right-width: 2px; border-top-right-radius: 4px; }
+  .focus-corner.bl { bottom: 14px; left: 14px; border-bottom-width: 2px; border-left-width: 2px; border-bottom-left-radius: 4px; }
+  .focus-corner.br { bottom: 14px; right: 14px; border-bottom-width: 2px; border-right-width: 2px; border-bottom-right-radius: 4px; }
 
   .camera-loader {
     position: absolute;
@@ -202,10 +212,78 @@
     cursor: pointer;
   }
 
-  /* Description Card Under Camera */
+  /* Carousel Section (Under Camera) */
+  .carousel-wrap {
+    width: 100%;
+    max-width: 440px;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .carousel-wrap.disabled {
+    opacity: .3;
+    pointer-events: none;
+  }
+
+  .carousel-fade {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 2;
+    width: 40px;
+    pointer-events: none;
+  }
+
+  .carousel-fade.left { left: 0; background: linear-gradient(90deg, #000 0%, rgba(0,0,0,0) 100%); }
+  .carousel-fade.right { right: 0; background: linear-gradient(270deg, #000 0%, rgba(0,0,0,0) 100%); }
+
+  .carousel {
+    width: 100%;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0 calc(50% - 36px);
+    scrollbar-width: none;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x;
+  }
+
+  .carousel::-webkit-scrollbar { display: none; }
+
+  .num-item {
+    flex: 0 0 72px;
+    width: 72px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    scroll-snap-align: center;
+    color: rgba(255,255,255,.32);
+    font-size: 16px;
+    font-weight: 600;
+    background: transparent;
+    border: none;
+    user-select: none;
+    cursor: pointer;
+    transition: transform .15s ease, color .15s ease;
+  }
+
+  .num-item.active {
+    color: var(--yellow);
+    font-size: 24px;
+    font-weight: 800;
+    transform: scale(1.15);
+    text-shadow: 0 0 12px rgba(255, 204, 0, 0.3);
+  }
+
+  /* Room Description Box (Moved UNDER Carousel) */
   .room-description-box {
     width: 100%;
-    max-width: 420px;
+    max-width: 440px;
     padding: 10px 14px;
     border-radius: 12px;
     background: var(--card-bg);
@@ -250,87 +328,19 @@
     color: var(--text-dim);
   }
 
-  /* Carousel Section (Clean Typography) */
-  .carousel-wrap {
-    width: 100%;
-    max-width: 420px;
-    position: relative;
-    margin-top: 4px;
-    flex-shrink: 0;
-  }
-
-  .carousel-wrap.disabled {
-    opacity: .3;
-    pointer-events: none;
-  }
-
-  .carousel-fade {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    z-index: 2;
-    width: 48px;
-    pointer-events: none;
-  }
-
-  .carousel-fade.left { left: 0; background: linear-gradient(90deg, #000 0%, rgba(0,0,0,0) 100%); }
-  .carousel-fade.right { right: 0; background: linear-gradient(270deg, #000 0%, rgba(0,0,0,0) 100%); }
-
-  .carousel {
-    width: 100%;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding: 0 calc(50% - 36px);
-    scrollbar-width: none;
-    scroll-snap-type: x mandatory;
-    overscroll-behavior-x: contain;
-    touch-action: pan-x;
-  }
-
-  .carousel::-webkit-scrollbar { display: none; }
-
-  .num-item {
-    flex: 0 0 72px;
-    width: 72px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    scroll-snap-align: center;
-    color: rgba(255,255,255,.32);
-    font-size: 16px;
-    font-weight: 600;
-    background: transparent;
-    border: none;
-    user-select: none;
-    cursor: pointer;
-    transition: all .15s ease;
-  }
-
-  .num-item.active {
-    color: var(--yellow);
-    font-size: 24px;
-    font-weight: 800;
-    transform: scale(1.15);
-    text-shadow: 0 0 12px rgba(255, 204, 0, 0.3);
-  }
-
-  /* Bottom Controls Area (Camera Shutter at Bottom) */
+  /* Controls Section */
   .bottom-controls-container {
     width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-bottom: calc(env(safe-area-inset-bottom) + 54px); /* Space above bottom drawer handle */
+    padding: 8px 0 calc(env(safe-area-inset-bottom) + 52px);
+    flex-shrink: 0;
   }
 
   .shutter-grid {
     width: 100%;
-    max-width: 420px;
+    max-width: 440px;
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
@@ -364,8 +374,8 @@
 
   #captureBtn {
     position: relative;
-    width: 70px;
-    height: 70px;
+    width: 68px;
+    height: 68px;
     display: grid;
     place-items: center;
     padding: 0;
@@ -400,7 +410,7 @@
     box-shadow: 0 4px 14px rgba(38,136,235,.30);
   }
 
-  /* ---------- Draggable Bottom Sheet Drawer ---------- */
+  /* ---------- Highly Optimized Bottom Sheet ---------- */
   .sheet-overlay {
     position: fixed;
     inset: 0;
@@ -409,7 +419,8 @@
     backdrop-filter: blur(4px);
     opacity: 0;
     pointer-events: none;
-    transition: opacity .25s ease;
+    transition: opacity .22s cubic-bezier(0.2, 0.8, 0.2, 1);
+    will-change: opacity;
   }
 
   .sheet-overlay.active {
@@ -432,30 +443,33 @@
     border-top: 1px solid rgba(255, 255, 255, 0.15);
     display: flex;
     flex-direction: column;
-    transform: translateY(calc(100% - 48px)); /* Peek handle at bottom */
-    transition: transform .3s cubic-bezier(0.1, 0.9, 0.2, 1);
+    transform: translate3d(0, calc(100% - 46px), 0);
+    transition: transform .28s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform;
     box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.8);
     touch-action: none;
   }
 
   .bottom-sheet.open {
-    transform: translateY(0) !important;
+    transform: translate3d(0, 0, 0) !important;
+  }
+
+  .bottom-sheet.dragging {
+    transition: none !important;
   }
 
   .sheet-handle-bar {
-    padding: 12px 16px 10px;
+    padding: 10px 16px 8px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     cursor: grab;
     user-select: none;
     background: #121214;
     border-top-left-radius: 20px;
     border-top-right-radius: 20px;
   }
-
-  .sheet-handle-bar:active { cursor: grabbing; }
 
   .sheet-handle {
     width: 36px;
@@ -468,15 +482,14 @@
     font-size: 13px;
     font-weight: 700;
     color: rgba(255, 255, 255, 0.8);
-    letter-spacing: 0.3px;
   }
 
   .sheet-header {
-    padding: 4px 16px 12px;
+    padding: 4px 16px 10px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
   }
 
   .sheet-title-row {
@@ -501,7 +514,7 @@
 
   .sheet-search {
     width: 100%;
-    padding: 10px 14px;
+    padding: 9px 12px;
     border: 1px solid var(--card-border);
     border-radius: 10px;
     background: rgba(255, 255, 255, 0.05);
@@ -509,8 +522,6 @@
     font-size: 14px;
     outline: none;
   }
-
-  .sheet-search::placeholder { color: rgba(255, 255, 255, 0.35); }
 
   .sheet-content {
     flex: 1;
@@ -584,7 +595,7 @@
 
   .room-chip.selected .chip-type { color: rgba(0, 0, 0, 0.7); }
 
-  /* Camera Message & Flash */
+  /* Utility Components */
   .camera-message {
     position: fixed;
     left: 50%;
@@ -599,14 +610,13 @@
     font-size: 13px;
     font-weight: 600;
     text-align: center;
-    box-shadow: 0 12px 30px rgba(0,0,0,.45);
     opacity: 0;
-    transform: translate(-50%, 10px);
+    transform: translate3d(-50%, 10px, 0);
     pointer-events: none;
     transition: opacity .18s ease, transform .18s ease;
   }
 
-  .camera-message.visible { opacity: 1; transform: translate(-50%, 0); }
+  .camera-message.visible { opacity: 1; transform: translate3d(-50%, 0, 0); }
 
   .flash-effect {
     position: fixed;
@@ -629,7 +639,7 @@
   }
 
   @media (min-width: 700px) {
-    :root { --page-pad: 24px; }
+    :root { --page-pad: 20px; }
     #app {
       max-width: 600px;
       margin: 0 auto;
@@ -641,13 +651,16 @@
 </head>
 <body>
 <div id="app">
-  <!-- Header -->
+  <!-- Top Header with Queue Indicator -->
   <header class="top-bar">
-    <div class="hotel-title">Hyatt Regency Terminal</div>
+    <div class="hotel-info">
+      <div class="hotel-title">Hyatt Regency Terminal</div>
+      <div class="queue-count" id="queueCount">В очереди: 14 номеров</div>
+    </div>
     <div class="room-badge" id="roomBadge">№ 500</div>
   </header>
 
-  <!-- Main View Area -->
+  <!-- Main View Area (Expanded Camera viewport) -->
   <main class="main-content">
     <!-- Camera Viewfinder -->
     <div class="viewport-container">
@@ -671,7 +684,14 @@
       </div>
     </div>
 
-    <!-- Room Description Card -->
+    <!-- Room Carousel (Placed directly under Camera) -->
+    <div class="carousel-wrap" id="carouselWrap">
+      <div class="carousel-fade left"></div>
+      <div class="carousel" id="carousel" aria-label="Выбор номера"></div>
+      <div class="carousel-fade right"></div>
+    </div>
+
+    <!-- Description Card (Moved BELOW Carousel) -->
     <div class="room-description-box" id="roomDescription">
       <div class="desc-header">
         <span class="desc-title" id="descRoomTitle">Номер 500</span>
@@ -681,16 +701,9 @@
         Информация о мини-баре и статус проверки (блок для будущего описания).
       </div>
     </div>
-
-    <!-- Room Carousel -->
-    <div class="carousel-wrap" id="carouselWrap">
-      <div class="carousel-fade left"></div>
-      <div class="carousel" id="carousel" aria-label="Выбор номера"></div>
-      <div class="carousel-fade right"></div>
-    </div>
   </main>
 
-  <!-- Bottom Controls Area (Shutter Button at Bottom) -->
+  <!-- Bottom Controls Area -->
   <footer class="bottom-controls-container">
     <div class="shutter-grid" id="cameraActions">
       <div class="grid-left">
@@ -718,12 +731,12 @@
   </footer>
 </div>
 
-<!-- Draggable Bottom Sheet Modal -->
+<!-- Lag-free Bottom Sheet Modal -->
 <div class="sheet-overlay" id="sheetOverlay"></div>
 <div class="bottom-sheet" id="bottomSheet">
   <div class="sheet-handle-bar" id="sheetHandleArea">
     <div class="sheet-handle"></div>
-    <div class="sheet-peek-title" id="sheetPeekTitle">Все номера отеля (293)</div>
+    <div class="sheet-peek-title" id="sheetPeekTitle">Показать все номера (293)</div>
   </div>
 
   <div class="sheet-header">
@@ -734,11 +747,11 @@
       </div>
       <button class="btn-close-sheet" id="btnCloseSheet" type="button">Закрыть</button>
     </div>
-    <input type="search" class="sheet-search" id="sheetSearch" placeholder="Поиск номера (например, 700, 1807)...">
+    <input type="search" class="sheet-search" id="sheetSearch" placeholder="Поиск номера...">
   </div>
 
   <div class="sheet-content" id="sheetContent">
-    <!-- Generated list of rooms -->
+    <!-- Generated room list -->
   </div>
 </div>
 
@@ -748,19 +761,15 @@
 <script type="module">
 import bridge from 'https://cdn.jsdelivr.net/npm/@vkontakte/vk-bridge@3.0.2/+esm';
 
-/* Hotel Data (293 Rooms) */
+/* Rooms Data */
 function generateRoomsData() {
   const rooms = [];
-
-  // Floor 5
   [500, 509, 534].forEach(n => rooms.push({ number: String(n), floor: 5, type: 'suite' }));
   [502, 504, 506, 508, 510, 512, 514, 516, 518, 520, 522, 524, 526, 528, 530, 532].forEach(n => rooms.push({ number: String(n), floor: 5, type: 'standard' }));
 
-  // Floor 6
   [600, 609, 634].forEach(n => rooms.push({ number: String(n), floor: 6, type: 'suite' }));
   [602, 604, 606, 608, 610, 612, 614, 616, 618, 620, 622, 624, 626, 628, 630, 632].forEach(n => rooms.push({ number: String(n), floor: 6, type: 'standard' }));
 
-  // Floors 7 - 17
   for (let f = 7; f <= 17; f++) {
     const suites = [f*100, f*100+9, f*100+17, f*100+25, f*100+34];
     const stds = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32].map(x => f*100 + x);
@@ -768,11 +777,9 @@ function generateRoomsData() {
     stds.forEach(n => rooms.push({ number: String(n), floor: f, type: 'standard' }));
   }
 
-  // Floor 18
   [1800, 1807, 1811, 1818].forEach(n => rooms.push({ number: String(n), floor: 18, type: 'suite' }));
   [1802, 1804, 1806, 1808, 1810, 1812, 1814, 1816].forEach(n => rooms.push({ number: String(n), floor: 18, type: 'standard' }));
 
-  // Floor 19
   [1911, 1919].forEach(n => rooms.push({ number: String(n), floor: 19, type: 'suite' }));
   [1902, 1904, 1906, 1908, 1910, 1912, 1914, 1916, 1918, 1920].forEach(n => rooms.push({ number: String(n), floor: 19, type: 'standard' }));
 
@@ -781,6 +788,7 @@ function generateRoomsData() {
 }
 
 const ALL_ROOMS = generateRoomsData();
+let queueRemaining = 14; // Queue length state
 
 /* Elements */
 const video = document.getElementById('camera');
@@ -800,6 +808,7 @@ const cameraActions = document.getElementById('cameraActions');
 const previewActions = document.getElementById('previewActions');
 const carouselWrap = document.getElementById('carouselWrap');
 const roomBadge = document.getElementById('roomBadge');
+const queueCount = document.getElementById('queueCount');
 const message = document.getElementById('message');
 const flashEffect = document.getElementById('flashEffect');
 
@@ -816,7 +825,6 @@ const sheetHandleArea = document.getElementById('sheetHandleArea');
 let stream = null;
 let videoTrack = null;
 let imageCapture = null;
-let photoCapabilities = null;
 let selectedRoom = ALL_ROOMS[0];
 let previewUrl = null;
 let snapTimer = null;
@@ -824,6 +832,10 @@ let messageTimer = null;
 let isCapturing = false;
 let isPreview = false;
 let isVKReady = false;
+
+function updateQueueDisplay() {
+  queueCount.textContent = `В очереди: ${queueRemaining} номеров`;
+}
 
 function showMessage(text, duration = 1800) {
   message.textContent = text;
@@ -841,11 +853,6 @@ async function initVK() {
   try {
     await bridge.send('VKWebAppInit');
     isVKReady = true;
-    try {
-      if (bridge.supports('VKWebAppDisableSwipeBack')) {
-        await bridge.send('VKWebAppDisableSwipeBack');
-      }
-    } catch (_) {}
   } catch (_) { isVKReady = false; }
 }
 
@@ -856,45 +863,12 @@ async function triggerHaptic() {
       return;
     }
   } catch (_) {}
-
   try {
     if (navigator.vibrate) navigator.vibrate(8);
   } catch (_) {}
 }
 
-async function setVKFlashLevel(level) {
-  if (!isVKReady) return false;
-  try {
-    if (!bridge.supports('VKWebAppFlashSetLevel')) return false;
-    await bridge.send('VKWebAppFlashSetLevel', { level });
-    return true;
-  } catch (_) { return false; }
-}
-
-/* Camera Management */
-function resetLoader() {
-  cameraLoader.classList.remove('error');
-  loaderSpinner.classList.remove('hidden');
-  loaderRetry.classList.add('hidden');
-  loaderTitle.textContent = 'Запуск камеры…';
-  loaderSubtitle.textContent = 'Разреши доступ к камере, чтобы сделать снимок.';
-}
-
-function showCameraError(error) {
-  cameraLoader.classList.add('error');
-  loaderSpinner.classList.add('hidden');
-  loaderRetry.classList.remove('hidden');
-  loaderTitle.textContent = 'Не удалось открыть камеру';
-
-  if (error?.name === 'NotAllowedError' || error?.name === 'SecurityError') {
-    loaderSubtitle.textContent = 'Проверь разрешение на камеру для VK и открой миниапп заново.';
-  } else if (error?.name === 'NotFoundError' || error?.name === 'DevicesNotFoundError') {
-    loaderSubtitle.textContent = 'Камера на этом устройстве не найдена.';
-  } else {
-    loaderSubtitle.textContent = 'Попробуй повторить запуск. Камера должна открываться по HTTPS.';
-  }
-}
-
+/* Camera Logic */
 async function stopCamera() {
   if (stream) {
     for (const track of stream.getTracks()) {
@@ -904,120 +878,41 @@ async function stopCamera() {
   stream = null;
   videoTrack = null;
   imageCapture = null;
-  photoCapabilities = null;
   video.srcObject = null;
   video.classList.remove('ready');
 }
 
 async function startCamera() {
-  resetLoader();
+  cameraLoader.classList.remove('error');
+  loaderSpinner.classList.remove('hidden');
+  loaderRetry.classList.add('hidden');
+  loaderTitle.textContent = 'Запуск камеры…';
+
   await stopCamera();
 
-  if (!navigator.mediaDevices?.getUserMedia) {
-    const error = new Error('getUserMedia is unavailable');
-    error.name = 'NotSupportedError';
-    showCameraError(error);
-    return;
-  }
-
   try {
-    const constraints = {
+    stream = await navigator.mediaDevices.getUserMedia({
       audio: false,
-      video: {
-        facingMode: { ideal: 'environment' },
-        aspectRatio: { ideal: 4 / 3 },
-        width: { ideal: 1920 },
-        height: { ideal: 1440 }
-      }
-    };
-
-    try {
-      stream = await navigator.mediaDevices.getUserMedia(constraints);
-    } catch (_) {
-      stream = await navigator.mediaDevices.getUserMedia({
-        audio: false,
-        video: { facingMode: { ideal: 'environment' } }
-      });
-    }
+      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1440 } }
+    });
 
     videoTrack = stream.getVideoTracks()[0] || null;
     video.srcObject = stream;
 
-    if (!videoTrack) throw new Error('Video track is missing');
-
-    if ('ImageCapture' in window) {
-      try {
-        imageCapture = new ImageCapture(videoTrack);
-        photoCapabilities = await imageCapture.getPhotoCapabilities();
-      } catch (_) {
-        imageCapture = null;
-        photoCapabilities = null;
-      }
+    if ('ImageCapture' in window && videoTrack) {
+      try { imageCapture = new ImageCapture(videoTrack); } catch (_) {}
     }
-
-    await new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => reject(new Error('Camera start timeout')), 8000);
-      const done = () => { clearTimeout(timeout); resolve(); };
-
-      if (video.readyState >= HTMLMediaElement.HAVE_METADATA) {
-        done();
-      } else {
-        video.addEventListener('loadedmetadata', done, { once: true });
-      }
-    });
 
     await video.play();
     video.classList.add('ready');
 
     cameraLoader.style.opacity = '0';
-    setTimeout(() => cameraLoader.classList.add('hidden'), 220);
+    setTimeout(() => cameraLoader.classList.add('hidden'), 200);
   } catch (error) {
-    console.error('[camera]', error);
-    await stopCamera();
-    showCameraError(error);
-  }
-}
-
-function supportsNativePhotoFlash() {
-  const modes = photoCapabilities?.fillLightMode;
-  return Array.isArray(modes) && modes.includes('flash');
-}
-
-async function enableTorchFallback() {
-  if (!videoTrack?.applyConstraints) return false;
-  try {
-    const capabilities = typeof videoTrack.getCapabilities === 'function' ? videoTrack.getCapabilities() : {};
-    if (!('torch' in capabilities)) return false;
-    await videoTrack.applyConstraints({ advanced: [{ torch: true }] });
-    return true;
-  } catch (_) { return false; }
-}
-
-async function disableTorchFallback() {
-  if (!videoTrack?.applyConstraints) return;
-  try { await videoTrack.applyConstraints({ advanced: [{ torch: false }] }); } catch (_) {}
-}
-
-async function takeNativePhoto() {
-  if (!imageCapture) return null;
-  try {
-    if (supportsNativePhotoFlash()) {
-      return await imageCapture.takePhoto({ fillLightMode: 'flash' });
-    }
-    const vkFlash = await setVKFlashLevel(1);
-    const torch = vkFlash ? false : await enableTorchFallback();
-
-    await new Promise(r => setTimeout(r, 90));
-    const blob = await imageCapture.takePhoto();
-
-    if (vkFlash) await setVKFlashLevel(0);
-    if (torch) await disableTorchFallback();
-
-    return blob;
-  } catch (error) {
-    try { await setVKFlashLevel(0); } catch (_) {}
-    await disableTorchFallback();
-    throw error;
+    cameraLoader.classList.add('error');
+    loaderSpinner.classList.add('hidden');
+    loaderRetry.classList.remove('hidden');
+    loaderTitle.textContent = 'Не удалось открыть камеру';
   }
 }
 
@@ -1030,13 +925,13 @@ function runVisualFlash() {
 function drawVideoToCanvas() {
   const vW = video.videoWidth;
   const vH = video.videoHeight;
-  if (!vW || !vH) throw new Error('Camera frame is not ready');
+  if (!vW || !vH) throw new Error('Frame error');
 
   canvas.width = vW;
   canvas.height = vH;
   const ctx = canvas.getContext('2d', { alpha: false });
   ctx.drawImage(video, 0, 0, vW, vH);
-  return canvas.toDataURL('image/jpeg', .94);
+  return canvas.toDataURL('image/jpeg', .92);
 }
 
 function releasePreviewUrl() {
@@ -1076,7 +971,6 @@ function resetPhoto() {
   photo.removeAttribute('src');
 
   releasePreviewUrl();
-
   video.classList.remove('hidden');
   video.classList.add('ready');
   try { video.play(); } catch (_) {}
@@ -1115,14 +1009,12 @@ function updateSelectedRoomState(room, vibrate = false) {
   });
 
   roomBadge.textContent = `№ ${room.number}`;
-
   descRoomTitle.textContent = `Номер ${room.number}`;
   const isSuite = room.type === 'suite';
   descRoomTag.textContent = `${isSuite ? 'Люкс' : 'Стандарт'} • ${room.floor} этаж`;
   descRoomTag.className = `desc-tag ${isSuite ? 'suite' : ''}`;
 
   updateDrawerSelectedChip(room.number);
-
   if (vibrate && changed) triggerHaptic();
 }
 
@@ -1167,7 +1059,7 @@ function updateNumberFromScroll() {
 carousel.addEventListener('scroll', () => {
   updateNumberFromScroll();
   clearTimeout(snapTimer);
-  snapTimer = setTimeout(() => updateNumberFromScroll(), 90);
+  snapTimer = setTimeout(() => updateNumberFromScroll(), 80);
 }, { passive: true });
 
 carousel.addEventListener('click', event => {
@@ -1176,11 +1068,13 @@ carousel.addEventListener('click', event => {
   selectRoomByNumber(item.dataset.number);
 });
 
-/* Draggable Drawer Logic */
+/* ---------- Smooth GPU-Accelerated Bottom Sheet ---------- */
 let isSheetOpen = false;
 let startY = 0;
 let currentY = 0;
 let isDragging = false;
+let sheetHeight = window.innerHeight * 0.82;
+let rafId = null;
 
 function renderDrawerRooms(filterQuery = '') {
   sheetContent.innerHTML = '';
@@ -1246,51 +1140,56 @@ function updateDrawerSelectedChip(numStr) {
 
 function openSheet() {
   isSheetOpen = true;
-  renderDrawerRooms(sheetSearch.value);
+  bottomSheet.classList.remove('dragging');
   sheetOverlay.classList.add('active');
   bottomSheet.classList.add('open');
-  bottomSheet.style.transform = '';
+  bottomSheet.style.transform = 'translate3d(0, 0, 0)';
   triggerHaptic();
 }
 
 function closeSheet() {
   isSheetOpen = false;
+  bottomSheet.classList.remove('dragging');
   sheetOverlay.classList.remove('active');
   bottomSheet.classList.remove('open');
-  bottomSheet.style.transform = '';
+  bottomSheet.style.transform = 'translate3d(0, calc(100% - 46px), 0)';
 }
 
-/* Touch drag handling */
+function updateSheetTransform() {
+  if (!isDragging) return;
+  const deltaY = currentY - startY;
+
+  if (!isSheetOpen) {
+    if (deltaY < 0) {
+      const translateY = Math.max(0, sheetHeight + deltaY);
+      bottomSheet.style.transform = `translate3d(0, ${translateY}px, 0)`;
+    }
+  } else {
+    if (deltaY > 0) {
+      bottomSheet.style.transform = `translate3d(0, ${deltaY}px, 0)`;
+    }
+  }
+}
+
 sheetHandleArea.addEventListener('touchstart', e => {
   startY = e.touches[0].clientY;
+  currentY = startY;
   isDragging = true;
-  bottomSheet.style.transition = 'none';
+  sheetHeight = bottomSheet.offsetHeight;
+  bottomSheet.classList.add('dragging');
 }, { passive: true });
 
 window.addEventListener('touchmove', e => {
   if (!isDragging) return;
   currentY = e.touches[0].clientY;
-  const deltaY = currentY - startY;
-
-  if (!isSheetOpen) {
-    // Dragging UP to open
-    if (deltaY < 0) {
-      const move = Math.max(0, 100 + (deltaY / (window.innerHeight * 0.8)) * 100);
-      bottomSheet.style.transform = `translateY(${move}%)`;
-    }
-  } else {
-    // Dragging DOWN to close
-    if (deltaY > 0) {
-      const move = Math.min(100, (deltaY / (window.innerHeight * 0.8)) * 100);
-      bottomSheet.style.transform = `translateY(${move}%)`;
-    }
-  }
+  if (rafId) cancelAnimationFrame(rafId);
+  rafId = requestAnimationFrame(updateSheetTransform);
 }, { passive: true });
 
-window.addEventListener('touchend', e => {
+window.addEventListener('touchend', () => {
   if (!isDragging) return;
   isDragging = false;
-  bottomSheet.style.transition = 'transform .3s cubic-bezier(0.1, 0.9, 0.2, 1)';
+  bottomSheet.classList.remove('dragging');
 
   const deltaY = currentY - startY;
   if (!isSheetOpen) {
@@ -1311,42 +1210,24 @@ btnCloseSheet.addEventListener('click', closeSheet);
 sheetOverlay.addEventListener('click', closeSheet);
 sheetSearch.addEventListener('input', e => renderDrawerRooms(e.target.value));
 
-/* Capture button */
+/* Actions */
 async function takePhoto() {
   if (isCapturing || isPreview || !videoTrack) return;
-  if (!video.videoWidth || !video.videoHeight) {
-    showMessage('Камера ещё не готова');
-    return;
-  }
-
   isCapturing = true;
   setBusy(captureBtn, true);
 
   try {
     let source = null;
     if (imageCapture) {
-      source = await takeNativePhoto();
-      runVisualFlash();
+      try { source = await imageCapture.takePhoto(); } catch (_) {}
     }
+    if (!source) source = drawVideoToCanvas();
 
-    if (!source) {
-      const torchViaVK = await setVKFlashLevel(1);
-      const torch = torchViaVK ? false : await enableTorchFallback();
-
-      await new Promise(r => setTimeout(r, 100));
-      source = drawVideoToCanvas();
-
-      if (torchViaVK) await setVKFlashLevel(0);
-      if (torch) await disableTorchFallback();
-
-      runVisualFlash();
-    }
-
+    runVisualFlash();
     showPreview(source);
     await triggerHaptic();
   } catch (error) {
-    console.error('[capture]', error);
-    showMessage('Не удалось сделать снимок. Попробуй ещё раз.', 2200);
+    showMessage('Ошибка при снимке');
   } finally {
     isCapturing = false;
     setBusy(captureBtn, false);
@@ -1360,32 +1241,34 @@ btnSend.addEventListener('click', async () => {
   if (!isPreview || btnSend.classList.contains('busy')) return;
 
   setBusy(btnSend, true);
-  const original = btnSend.textContent;
   btnSend.textContent = 'Отправка…';
 
-  await new Promise(r => setTimeout(r, 650));
+  await new Promise(r => setTimeout(r, 500));
+
+  if (queueRemaining > 0) queueRemaining--;
+  updateQueueDisplay();
 
   btnSend.textContent = 'Отправлено';
   await triggerHaptic();
 
   setTimeout(() => {
-    btnSend.textContent = original;
+    btnSend.textContent = 'Отправить';
     setBusy(btnSend, false);
     resetPhoto();
-  }, 650);
+  }, 500);
 });
 
 btnEmpty.addEventListener('click', async () => {
   await triggerHaptic();
+  if (queueRemaining > 0) queueRemaining--;
+  updateQueueDisplay();
   showMessage(`№ ${selectedRoom.number} помечен как «Опустошён»`);
 });
 
 loaderRetry.addEventListener('click', startCamera);
 
-window.addEventListener('pagehide', () => { stopCamera(); releasePreviewUrl(); });
-window.addEventListener('beforeunload', () => { stopCamera(); releasePreviewUrl(); });
-
 (async function boot() {
+  updateQueueDisplay();
   buildCarousel();
   renderDrawerRooms();
   await initVK();
