@@ -326,11 +326,11 @@
   /* Controls Section */
   .controls-section {
     width: 100%;
+    flex: 1;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    padding: 8px 0;
-    flex-shrink: 0;
+    justify-content: center;
+    padding: 0 16px;
   }
 
   .shutter-grid {
@@ -1131,16 +1131,12 @@ function resetPhoto() {
   video.classList.remove('hidden');
   video.classList.add('ready');
 
-  // Явно сбросить aspect-ratio к текущему orientation камеры
+  // Всегда сбрасывать viewport в портретный формат
   if (video.videoWidth && video.videoHeight) {
     const w = video.videoWidth;
     const h = video.videoHeight;
-    const angle = getCaptureOrientationAngle();
-    if (angle === 90 || angle === 270) {
-      setViewportAspect(h, w);
-    } else {
-      setViewportAspect(w, h);
-    }
+    // Видео поток обычно ландшафтный — меняем местами для портрета
+    setViewportAspect(Math.min(w, h), Math.max(w, h));
   }
 
   try { video.play(); } catch (_) {}
