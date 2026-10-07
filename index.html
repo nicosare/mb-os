@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#000000">
-<title>VK Camera</title>
+<title>VK Camera Terminal</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   
@@ -32,30 +32,16 @@
     padding: calc(env(safe-area-inset-top) + 12px) 20px 12px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     z-index: 10;
     background: #000;
   }
 
-  .icon-btn {
-    background: rgba(255, 255, 255, 0.15);
-    border: none;
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    color: #fff;
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-  }
-
   .room-badge {
     background: rgba(255, 255, 255, 0.12);
-    padding: 6px 16px;
+    padding: 6px 18px;
     border-radius: 20px;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 600;
     letter-spacing: 0.5px;
   }
@@ -77,7 +63,7 @@
     aspect-ratio: 3 / 4;
     position: relative;
     overflow: hidden;
-    background: #050505;
+    background: #0d0d0d;
   }
 
   #camera, #photo {
@@ -89,39 +75,33 @@
 
   #photo { display: none; }
 
-  /* Сетка и прицел фокуса */
-  .camera-grid {
+  /* Плавный лоадер загрузки камеры */
+  .camera-loader {
     position: absolute;
     inset: 0;
-    pointer-events: none;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr 1fr;
-  }
-
-  .grid-cell {
-    border: 0.5px solid rgba(255, 255, 255, 0.18);
-  }
-
-  .focus-marker {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 64px;
-    height: 64px;
-    border: 1.5px solid #ffcc00;
-    pointer-events: none;
+    background: #0d0d0d;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 12px;
+    z-index: 5;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+    transition: opacity 0.3s ease;
   }
 
-  .focus-marker::after {
-    content: "+";
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 20px;
-    font-weight: 300;
+  .spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top-color: #2688eb;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
   }
 
   /* Нижняя панель и карусель */
@@ -134,7 +114,6 @@
     gap: 16px;
   }
 
-  /* Карусель номеров */
   .carousel-wrap {
     width: 100%;
     max-width: 400px;
@@ -173,14 +152,18 @@
     transform: scale(1.1);
   }
 
-  /* Кнопки затвора */
-  .shutter-row {
+  /* Строго центрированная сетка кнопок управления */
+  .shutter-grid {
     width: 100%;
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    justify-content: space-between;
-    padding: 0 16px;
+    padding: 0 8px;
   }
+
+  .grid-left { justify-self: start; }
+  .grid-center { justify-self: center; }
+  .grid-right { justify-self: end; }
 
   .btn-side {
     background: transparent;
@@ -189,7 +172,7 @@
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
-    min-width: 80px;
+    padding: 8px 12px;
   }
 
   .btn-side.danger { color: #ff4e4e; }
@@ -216,7 +199,7 @@
     background: #2688eb;
     color: #fff;
     border: none;
-    padding: 12px 24px;
+    padding: 12px 20px;
     border-radius: 20px;
     font-size: 15px;
     font-weight: 600;
@@ -229,47 +212,52 @@
 <body>
 
 <div id="app">
-  <!-- Верхняя панель -->
+  <!-- Шапка -->
   <div class="top-bar">
-    <button class="icon-btn" id="btnFlash">⚡</button>
     <div class="room-badge" id="roomBadge">№ 01</div>
-    <div style="width:38px;"></div>
   </div>
 
   <!-- Видоискатель камеры -->
   <div class="viewport-container">
     <div class="viewfinder">
+      <!-- Лоадер -->
+      <div class="camera-loader" id="cameraLoader">
+        <div class="spinner"></div>
+        <span>Запуск камеры...</span>
+      </div>
+
       <video id="camera" autoplay playsinline muted></video>
       <img id="photo" alt="Снимок">
-      
-      <!-- Сетка и фокус -->
-      <div class="camera-grid" id="gridOverlay">
-        <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
-        <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
-        <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
-      </div>
-      <div class="focus-marker" id="focusMarker"></div>
     </div>
   </div>
 
-  <!-- Нижняя панель управления -->
+  <!-- Нижняя панель -->
   <div class="bottom-bar">
     <!-- Карусель номеров -->
     <div class="carousel-wrap" id="carouselWrap">
       <div class="carousel" id="carousel"></div>
     </div>
 
-    <!-- Кнопки съемки -->
-    <div class="shutter-row" id="cameraActions">
-      <button class="btn-side danger" id="btnEmpty">Опустошён</button>
-      <button id="captureBtn" aria-label="Сделать фото"><span></span></button>
-      <div style="min-width:80px;"></div>
+    <!-- Панель затвора (Строго по центру) -->
+    <div class="shutter-grid" id="cameraActions">
+      <div class="grid-left">
+        <button class="btn-side danger" id="btnEmpty">Опустошён</button>
+      </div>
+      <div class="grid-center">
+        <button id="captureBtn" aria-label="Сделать фото"><span></span></button>
+      </div>
+      <div class="grid-right"></div>
     </div>
 
-    <!-- Кнопки превью -->
-    <div class="shutter-row hidden" id="previewActions">
-      <button class="btn-side" id="btnRetake">✕ Переснять</button>
-      <button class="btn-send" id="btnSend">Отправить 🚀</button>
+    <!-- Панель превью -->
+    <div class="shutter-grid hidden" id="previewActions">
+      <div class="grid-left">
+        <button class="btn-side" id="btnRetake">✕ Переснять</button>
+      </div>
+      <div class="grid-center"></div>
+      <div class="grid-right">
+        <button class="btn-send" id="btnSend">Отправить 🚀</button>
+      </div>
     </div>
   </div>
 </div>
@@ -280,31 +268,27 @@ import bridge from 'https://cdn.jsdelivr.net/npm/@vkontakte/vk-bridge@3.0.2/+esm
 const video = document.getElementById('camera');
 const photo = document.getElementById('photo');
 const canvas = document.createElement('canvas');
+const cameraLoader = document.getElementById('cameraLoader');
 const carousel = document.getElementById('carousel');
 const captureBtn = document.getElementById('captureBtn');
 const btnRetake = document.getElementById('btnRetake');
 const btnSend = document.getElementById('btnSend');
 const btnEmpty = document.getElementById('btnEmpty');
-const btnFlash = document.getElementById('btnFlash');
 const cameraActions = document.getElementById('cameraActions');
 const previewActions = document.getElementById('previewActions');
 const carouselWrap = document.getElementById('carouselWrap');
-const gridOverlay = document.getElementById('gridOverlay');
-const focusMarker = document.getElementById('focusMarker');
 const roomBadge = document.getElementById('roomBadge');
 
 let stream = null;
 let selectedNumber = 1;
 let snapTimer = null;
-let flashlightAvailable = false;
-let flashEnabled = true;
 
 // 1. Инициализация VK Bridge
 async function initVK() {
   try { await bridge.send('VKWebAppInit'); } catch(e){}
 }
 
-// 2. Тактильный отклик
+// 2. Вибрация
 async function triggerHaptic() {
   try {
     if (bridge.supports('VKWebAppTapticSelectionChanged')) {
@@ -315,22 +299,29 @@ async function triggerHaptic() {
   if (navigator.vibrate) navigator.vibrate(10);
 }
 
-// 3. Работа со вспышкой
-async function checkFlashlight() {
+// 3. Управление вспышкой (Torch)
+async function setFlash(enable) {
+  const level = enable ? 1 : 0;
+  
+  // Метод 1: Через VK Bridge
   try {
-    if (bridge.supports('VKWebAppFlashGetInfo')) {
-      const data = await bridge.send('VKWebAppFlashGetInfo');
-      flashlightAvailable = !!data?.is_available;
+    if (bridge.supports('VKWebAppFlashSetLevel')) {
+      await bridge.send('VKWebAppFlashSetLevel', { level });
     }
-  } catch(e) { flashlightAvailable = false; }
+  } catch(e){}
+
+  // Метод 2: Напрямую через MediaStreamTrack камеры
+  if (stream) {
+    const track = stream.getVideoTracks()[0];
+    if (track && track.applyConstraints) {
+      try {
+        await track.applyConstraints({ advanced: [{ torch: enable }] });
+      } catch(e){}
+    }
+  }
 }
 
-async function setFlashlight(level) {
-  if (!flashlightAvailable || !flashEnabled) return;
-  try { await bridge.send('VKWebAppFlashSetLevel', { level }); } catch(e){}
-}
-
-// 4. Мгновенный старт камеры при открытии
+// 4. Мгновенный запуск камеры
 async function startCamera() {
   try {
     stream = await navigator.mediaDevices.getUserMedia({
@@ -338,10 +329,16 @@ async function startCamera() {
       audio: false
     });
     video.srcObject = stream;
+    
+    video.onloadeddata = () => {
+      cameraLoader.style.opacity = '0';
+      setTimeout(() => cameraLoader.classList.add('hidden'), 300);
+    };
+    
     await video.play();
-    await checkFlashlight();
   } catch(e) {
-    console.error('Ошибка доступа к камере:', e);
+    console.error('Ошибка камеры:', e);
+    cameraLoader.querySelector('span').textContent = 'Ошибка доступа к камере';
   }
 }
 
@@ -409,53 +406,79 @@ carousel.addEventListener('click', (e) => {
   if (item) selectNumber(Number(item.dataset.number));
 });
 
-// 6. Съемка с экспопаузой для вспышки
+// 6. Съемка со вспышкой и правильным поворотом фото
 async function takePhoto() {
   if (!video.videoWidth) return;
 
-  // Включаем вспышку
-  await setFlashlight(1);
+  // 1. Включаем вспышку
+  await setFlash(true);
 
-  // ЗАДЕРЖКА: Даем 400мс сенсору камеры подстроить экспозицию под яркость фонарика
-  await new Promise(resolve => setTimeout(resolve, 400));
+  // 2. Пауза 300мс, чтобы сенсор успел зафиксировать яркий кадр
+  await new Promise(resolve => setTimeout(resolve, 300));
 
-  const w = video.videoWidth;
-  const h = video.videoHeight;
-  canvas.width = w;
-  canvas.height = h;
+  // 3. Вычисление ориентации для разворота кадра
+  const angle = (screen.orientation && screen.orientation.angle !== undefined) 
+    ? screen.orientation.angle 
+    : (window.orientation || 0);
+
+  const vW = video.videoWidth;
+  const vH = video.videoHeight;
+
+  // Если телефон развернут набок (90 или 270 град)
+  if (angle === 90 || angle === -90 || angle === 270) {
+    canvas.width = vH;
+    canvas.height = vW;
+  } else {
+    canvas.width = vW;
+    canvas.height = vH;
+  }
+
   const ctx = canvas.getContext('2d');
+  ctx.save();
 
-  ctx.drawImage(video, 0, 0, w, h);
+  // Трансформация контекста в зависимости от поворота
+  if (angle === 90) {
+    ctx.translate(canvas.width, 0);
+    ctx.rotate((90 * Math.PI) / 180);
+  } else if (angle === 180) {
+    ctx.translate(canvas.width, canvas.height);
+    ctx.rotate((180 * Math.PI) / 180);
+  } else if (angle === 270 || angle === -90) {
+    ctx.translate(0, canvas.height);
+    ctx.rotate((-90 * Math.PI) / 180);
+  }
 
-  // Выключаем вспышку после снимка
-  await setFlashlight(0);
+  ctx.drawImage(video, 0, 0, vW, vH);
+  ctx.restore();
+
+  // 4. Выключаем вспышку
+  await setFlash(false);
   await triggerHaptic();
 
+  // 5. Показ превью
   photo.src = canvas.toDataURL('image/jpeg', 0.92);
   photo.style.display = 'block';
   video.style.display = 'none';
 
-  gridOverlay.classList.add('hidden');
-  focusMarker.classList.add('hidden');
   cameraActions.classList.add('hidden');
   previewActions.classList.remove('hidden');
   carouselWrap.style.opacity = '0.3';
   carouselWrap.style.pointerEvents = 'none';
 }
 
+// Полный сброс превью
 function resetPhoto() {
   photo.style.display = 'none';
+  photo.src = ''; // Полное очищение ресурса картинки
   video.style.display = 'block';
 
-  gridOverlay.classList.remove('hidden');
-  focusMarker.classList.remove('hidden');
   previewActions.classList.add('hidden');
   cameraActions.classList.remove('hidden');
   carouselWrap.style.opacity = '1';
   carouselWrap.style.pointerEvents = 'auto';
 }
 
-// 7. События
+// 7. Обработчики событий
 captureBtn.addEventListener('click', takePhoto);
 btnRetake.addEventListener('click', resetPhoto);
 
@@ -472,13 +495,7 @@ btnEmpty.addEventListener('click', () => {
   alert(`№${String(selectedNumber).padStart(2, '0')} помечен как «Опустошён»`);
 });
 
-btnFlash.addEventListener('click', () => {
-  flashEnabled = !flashEnabled;
-  btnFlash.style.opacity = flashEnabled ? '1' : '0.4';
-  triggerHaptic();
-});
-
-// Автостарт при загрузке
+// Автостарт
 document.addEventListener('DOMContentLoaded', () => {
   buildCarousel();
   initVK();
