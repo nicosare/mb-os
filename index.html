@@ -324,12 +324,12 @@
   }
 
   /* Controls Section */
-  .bottom-controls-container {
+  .controls-section {
     width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 4px 0 calc(env(safe-area-inset-bottom) + 72px);
+    padding: 8px 0;
     flex-shrink: 0;
   }
 
@@ -679,34 +679,34 @@
         Информация о мини-баре и статус проверки (блок для будущего описания).
       </div>
     </div>
+
+    <!-- Shutter Controls -->
+    <div class="controls-section">
+      <div class="shutter-grid" id="cameraActions">
+        <div class="grid-left">
+          <button class="btn-side danger" id="btnEmpty" type="button">Опустошён</button>
+        </div>
+
+        <div class="grid-center">
+          <button id="captureBtn" type="button" aria-label="Сделать фото"></button>
+        </div>
+
+        <div class="grid-right"></div>
+      </div>
+
+      <div class="shutter-grid hidden" id="previewActions">
+        <div class="grid-left">
+          <button class="btn-side" id="btnRetake" type="button">Переснять</button>
+        </div>
+
+        <div class="grid-center"></div>
+
+        <div class="grid-right">
+          <button class="btn-send" id="btnSend" type="button">Отправить</button>
+        </div>
+      </div>
+    </div>
   </main>
-
-  <!-- Bottom Controls Area -->
-  <footer class="bottom-controls-container">
-    <div class="shutter-grid" id="cameraActions">
-      <div class="grid-left">
-        <button class="btn-side danger" id="btnEmpty" type="button">Опустошён</button>
-      </div>
-
-      <div class="grid-center">
-        <button id="captureBtn" type="button" aria-label="Сделать фото"></button>
-      </div>
-
-      <div class="grid-right"></div>
-    </div>
-
-    <div class="shutter-grid hidden" id="previewActions">
-      <div class="grid-left">
-        <button class="btn-side" id="btnRetake" type="button">Переснять</button>
-      </div>
-
-      <div class="grid-center"></div>
-
-      <div class="grid-right">
-        <button class="btn-send" id="btnSend" type="button">Отправить</button>
-      </div>
-    </div>
-  </footer>
 </div>
 
 <!-- Bottom Sheet Modal -->
@@ -1130,7 +1130,19 @@ function resetPhoto() {
   photo.classList.add('hidden');
   video.classList.remove('hidden');
   video.classList.add('ready');
-  syncLiveViewportAspect();
+
+  // Явно сбросить aspect-ratio к текущему orientation камеры
+  if (video.videoWidth && video.videoHeight) {
+    const w = video.videoWidth;
+    const h = video.videoHeight;
+    const angle = getCaptureOrientationAngle();
+    if (angle === 90 || angle === 270) {
+      setViewportAspect(h, w);
+    } else {
+      setViewportAspect(w, h);
+    }
+  }
+
   try { video.play(); } catch (_) {}
 }
 
@@ -1373,8 +1385,13 @@ async function takePhoto() {
     const torchAlreadyOn = torchArmed;
 
     if (torchSupported) await armTorch();
-    if (torchArmed && !torchAlreadyOn) await wait(70);
-    else if (torchArmed) await waitForVideoFrame();
+    // Дать камере время на фокусировку и адаптацию к вспышке
+    if (torchArmed) {
+      await waitForVideoFrame();
+      await wait(400);
+    } else if (torchAlreadyOn) {
+      await waitForVideoFrame();
+    }
 
     drawRotatedVideoToCanvas(captureAngle);
     showPreviewFromCanvas();
