@@ -329,7 +329,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 8px 0 calc(env(safe-area-inset-bottom) + 52px);
+    padding: 4px 0 calc(env(safe-area-inset-bottom) + 72px);
     flex-shrink: 0;
   }
 
@@ -644,7 +644,7 @@
     <div class="viewport-container">
       <div class="viewfinder" id="viewfinder">
         <video id="camera" autoplay playsinline muted></video>
-        <img id="photo" alt="Сделать снимок" class="hidden">
+        <canvas id="photo" class="hidden" aria-label="Снимок"></canvas>
 
         <div class="camera-overlay" aria-hidden="true">
           <span class="focus-corner tl"></span>
@@ -763,7 +763,9 @@ function generateRoomsData() {
 }
 
 const ALL_ROOMS = generateRoomsData();
-let queueRemaining = ALL_ROOMS.length; // Инициализация реальным количеством из базы
+const ROOM_BY_NUMBER = new Map(ALL_ROOMS.map(room => [room.number, room]));
+const FLOORS = [...new Set(ALL_ROOMS.map(room => room.floor))];
+let queueRemaining = ALL_ROOMS.length;
 
 /* Orientation Tracking
    Не полагаемся только на screen.orientation: при выключенном
@@ -806,11 +808,9 @@ function updateOrientationFromSensor(beta, gamma) {
 }
 
 function getCaptureOrientationAngle() {
-  // The sensor is authoritative when it has produced a recent sample.
-  if (Date.now() - lastSensorOrientationAt < 1500) {
+  if (Date.now() - lastSensorOrientationAt < 2000) {
     return normalizeAngle(currentDeviceAngle);
   }
-
   updateOrientationFromScreen();
   return normalizeAngle(currentDeviceAngle);
 }
@@ -841,7 +841,7 @@ if (window.DeviceOrientationEvent) {
 const video = document.getElementById('camera');
 const photo = document.getElementById('photo');
 const viewportContainer = document.querySelector('.viewport-container');
-const canvas = document.createElement('canvas');
+const canvas = photo;
 const cameraLoader = document.getElementById('cameraLoader');
 const loaderSpinner = document.getElementById('loaderSpinner');
 const loaderTitle = document.getElementById('loaderTitle');
@@ -890,15 +890,20 @@ function syncLiveViewportAspect() {
 
 let stream = null;
 let videoTrack = null;
-let imageCapture = null;
-let nativeFlashSupported = false;
+let torchSupported = false;
+let torchArmed = false;
+let torchPromise = null;
 let selectedRoom = ALL_ROOMS[0];
-let previewUrl = null;
+let previewBlob = null;
+let previewBlobPromise = null;
 let snapTimer = null;
 let messageTimer = null;
 let isCapturing = false;
 let isPreview = false;
 let isVKReady = false;
+let orientationPermissionAsked = false;
+const carouselItems = new Map();
+let activeCarouselItem = null;
 
 function updateQueueDisplay() {
   queueCount.textContent = `В очереди: ${queueRemaining} номеров`;
@@ -923,10 +928,10 @@ async function initVK() {
   } catch (_) { isVKReady = false; }
 }
 
-async function triggerHaptic() {
+function triggerHaptic() {
   try {
     if (isVKReady && bridge.supports('VKWebAppTapticSelectionChanged')) {
-      await bridge.send('VKWebAppTapticSelectionChanged');
+      bridge.send('VKWebAppTapticSelectionChanged');
       return;
     }
   } catch (_) {}
@@ -935,47 +940,17 @@ async function triggerHaptic() {
   } catch (_) {}
 }
 
-async function ensureOrientationSensorPermission() {
+function ensureOrientationSensorPermission() {
+  if (orientationPermissionAsked) return;
+  orientationPermissionAsked = true;
+
   try {
-    if (
-      typeof window.DeviceOrientationEvent !== 'undefined' &&
-      typeof window.DeviceOrientationEvent.requestPermission === 'function'
-    ) {
-      const state = await window.DeviceOrientationEvent.requestPermission();
-      return state === 'granted';
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+      DeviceOrientationEvent.requestPermission().catch(() => {});
     }
   } catch (_) {}
-  return true;
 }
 
-function waitForOrientationSample(timeoutMs = 400) {
-  if (Date.now() - lastSensorOrientationAt < 1500) {
-    return Promise.resolve(true);
-  }
-
-  return new Promise(resolve => {
-    let settled = false;
-
-    const finish = ok => {
-      if (settled) return;
-      settled = true;
-      window.removeEventListener('deviceorientation', onSample, true);
-      window.removeEventListener('deviceorientationabsolute', onSample, true);
-      clearTimeout(timer);
-      resolve(ok);
-    };
-
-    const onSample = () => {
-      if (Date.now() - lastSensorOrientationAt < 1500) finish(true);
-    };
-
-    const timer = setTimeout(() => finish(false), timeoutMs);
-    window.addEventListener('deviceorientation', onSample, true);
-    window.addEventListener('deviceorientationabsolute', onSample, true);
-  });
-}
-
-/* Camera capture helpers */
 function wait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -990,92 +965,51 @@ function waitForVideoFrame() {
   });
 }
 
-function buildTorchConstraints(enabled) {
-  const base = videoTrack && typeof videoTrack.getConstraints === 'function'
-    ? videoTrack.getConstraints()
-    : {};
-
-  const advanced = Array.isArray(base.advanced)
-    ? base.advanced.filter(item => !Object.prototype.hasOwnProperty.call(item, 'torch'))
-    : [];
-
-  advanced.push({ torch: enabled });
-
-  return { ...base, advanced };
+function detectTorchSupport() {
+  torchSupported = false;
+  if (!videoTrack || typeof videoTrack.getCapabilities !== 'function') return;
+  try {
+    torchSupported = videoTrack.getCapabilities()?.torch === true;
+  } catch (_) {
+    torchSupported = false;
+  }
 }
 
 async function setTorch(enabled) {
-  if (!videoTrack || typeof videoTrack.getCapabilities !== 'function') return false;
-
+  if (!torchSupported || !videoTrack) return false;
   try {
-    const caps = videoTrack.getCapabilities();
-    if (!caps || caps.torch !== true) return false;
-
-    await videoTrack.applyConstraints(buildTorchConstraints(enabled));
+    await videoTrack.applyConstraints({ advanced: [{ torch: enabled }] });
     return true;
   } catch (_) {
     return false;
   }
 }
 
-/* Fallback for browsers without native still-photo flash:
-   enable the rear-camera torch, let exposure settle, capture the frame,
-   then turn it off immediately. */
-async function captureWithTorch(angle) {
-  const torchEnabled = await setTorch(true);
+async function armTorch() {
+  if (isPreview || !torchSupported) return torchArmed;
+  if (torchArmed) return true;
+  if (torchPromise) return torchPromise;
 
-  if (torchEnabled) {
-    await wait(180);
-    await waitForVideoFrame();
-  }
+  torchPromise = setTorch(true).then(ok => {
+    torchArmed = ok;
+    torchPromise = null;
+    return ok;
+  });
+  return torchPromise;
+}
 
-  try {
-    const frameCanvas = drawRotatedVideoToCanvas(angle);
-    return await canvasToBlob(frameCanvas);
-  } finally {
-    if (torchEnabled) {
-      await setTorch(false);
-    }
+async function disarmTorch() {
+  if (isCapturing) return;
+  torchPromise = null;
+  if (torchArmed || torchSupported) {
+    torchArmed = false;
+    setTorch(false);
   }
 }
 
-async function getNativePhotoCapabilities() {
-  imageCapture = null;
-  nativeFlashSupported = false;
-
-  if (!videoTrack || typeof window.ImageCapture !== 'function') return;
-
-  try {
-    imageCapture = new window.ImageCapture(videoTrack);
-    const capabilities = await imageCapture.getPhotoCapabilities();
-
-    nativeFlashSupported = Array.isArray(capabilities?.fillLightMode)
-      && capabilities.fillLightMode.includes('flash');
-  } catch (_) {
-    imageCapture = null;
-    nativeFlashSupported = false;
-  }
-}
-
-/* Native camera exposure is preferred because the browser can synchronize
-   the physical flash with the actual still-photo exposure. */
-async function captureWithNativeFlash(angle) {
-  if (!imageCapture || !nativeFlashSupported) return null;
-
-  try {
-    const blob = await imageCapture.takePhoto({ fillLightMode: 'flash' });
-    if (!(blob instanceof Blob) || !blob.size) return null;
-    // takePhoto ignores device tilt and may only store rotation in EXIF.
-    // Bake the same gravity-correct rotation used for the video fallback.
-    await drawRotatedStillToCanvas(blob, angle);
-    return await canvasToBlob(canvas);
-  } catch (_) {
-    return null;
-  }
-}
-
-/* Camera Stream Control */
 async function stopCamera() {
+  torchArmed = false;
+  torchPromise = null;
   if (stream) {
     for (const track of stream.getTracks()) {
       try { track.stop(); } catch (_) {}
@@ -1083,8 +1017,7 @@ async function stopCamera() {
   }
   stream = null;
   videoTrack = null;
-  imageCapture = null;
-  nativeFlashSupported = false;
+  torchSupported = false;
   video.srcObject = null;
   video.classList.remove('ready');
 }
@@ -1108,15 +1041,13 @@ async function startCamera() {
     video.srcObject = stream;
 
     await video.play();
+    detectTorchSupport();
     syncLiveViewportAspect();
     video.classList.add('ready');
 
-    // Capabilities become available only after the track is actually streaming.
-    await getNativePhotoCapabilities();
-
     cameraLoader.style.opacity = '0';
     setTimeout(() => cameraLoader.classList.add('hidden'), 200);
-  } catch (error) {
+  } catch (_) {
     cameraLoader.classList.add('error');
     loaderSpinner.classList.add('hidden');
     loaderRetry.classList.remove('hidden');
@@ -1124,10 +1055,9 @@ async function startCamera() {
   }
 }
 
-/* Correct photo orientation on Canvas.
-   The pixels themselves are rotated; the resulting JPEG does not depend
-   on the phone's later orientation or on EXIF metadata. */
-function drawRotatedSourceToCanvas(source, srcW, srcH, angle = getCaptureOrientationAngle()) {
+function drawRotatedVideoToCanvas(angle = getCaptureOrientationAngle()) {
+  const srcW = video.videoWidth;
+  const srcH = video.videoHeight;
   if (!srcW || !srcH) throw new Error('Frame error');
 
   angle = normalizeAngle(angle);
@@ -1154,76 +1084,28 @@ function drawRotatedSourceToCanvas(source, srcW, srcH, angle = getCaptureOrienta
     ctx.rotate(-Math.PI / 2);
   }
 
-  ctx.drawImage(source, 0, 0, srcW, srcH);
+  ctx.drawImage(video, 0, 0, srcW, srcH);
   ctx.restore();
-
-  return canvas;
 }
 
-function drawRotatedVideoToCanvas(angle = getCaptureOrientationAngle()) {
-  return drawRotatedSourceToCanvas(video, video.videoWidth, video.videoHeight, angle);
-}
-
-async function drawRotatedStillToCanvas(blob, angle) {
-  let bitmap = null;
-
-  try {
-    // Keep sensor-native pixels; we apply captureAngle ourselves.
-    // Otherwise EXIF-aware decode + sensor rotation would double-rotate.
-    try {
-      bitmap = await createImageBitmap(blob, { imageOrientation: 'none' });
-    } catch (_) {
-      bitmap = await createImageBitmap(blob);
-    }
-
-    drawRotatedSourceToCanvas(bitmap, bitmap.width, bitmap.height, angle);
-    return canvas;
-  } finally {
-    if (bitmap && typeof bitmap.close === 'function') bitmap.close();
-  }
-}
-
-function canvasToBlob(sourceCanvas) {
-  return new Promise((resolve, reject) => {
-    sourceCanvas.toBlob(
-      blob => blob && blob.size
-        ? resolve(blob)
-        : reject(new Error('Photo encode error')),
+function encodePreviewBlob() {
+  previewBlob = null;
+  previewBlobPromise = new Promise(resolve => {
+    canvas.toBlob(
+      blob => {
+        previewBlob = blob && blob.size ? blob : null;
+        resolve(previewBlob);
+      },
       'image/jpeg',
-      0.92
+      0.9
     );
   });
+  return previewBlobPromise;
 }
 
-function releasePreviewUrl() {
-  if (previewUrl) {
-    URL.revokeObjectURL(previewUrl);
-    previewUrl = null;
-  }
-}
-
-function showPreview(source) {
-  releasePreviewUrl();
-
-  // Oriented JPEG size is already on the canvas. Do not wait for <img>
-  // naturalWidth: some engines report unrotated pixel size (EXIF).
+function showPreviewFromCanvas() {
   if (canvas.width && canvas.height) {
     setViewportAspect(canvas.width, canvas.height);
-  }
-
-  photo.onload = () => {
-    if (canvas.width && canvas.height) {
-      setViewportAspect(canvas.width, canvas.height);
-      return;
-    }
-    setViewportAspect(photo.naturalWidth, photo.naturalHeight);
-  };
-
-  if (source instanceof Blob) {
-    previewUrl = URL.createObjectURL(source);
-    photo.src = previewUrl;
-  } else {
-    photo.src = source;
   }
 
   video.classList.remove('ready');
@@ -1237,18 +1119,15 @@ function showPreview(source) {
   isPreview = true;
 }
 
-photo.onerror = () => showMessage('Не удалось открыть снимок');
-
 function resetPhoto() {
   isPreview = false;
+  previewBlob = null;
+  previewBlobPromise = null;
   previewActions.classList.add('hidden');
   cameraActions.classList.remove('hidden');
   carouselWrap.classList.remove('disabled');
 
   photo.classList.add('hidden');
-  photo.removeAttribute('src');
-
-  releasePreviewUrl();
   video.classList.remove('hidden');
   video.classList.add('ready');
   syncLiveViewportAspect();
@@ -1258,6 +1137,7 @@ function resetPhoto() {
 /* Carousel */
 function buildCarousel() {
   carousel.innerHTML = '';
+  carouselItems.clear();
   const fragment = document.createDocumentFragment();
 
   ALL_ROOMS.forEach(room => {
@@ -1266,6 +1146,7 @@ function buildCarousel() {
     el.className = 'num-item';
     el.dataset.number = room.number;
     el.textContent = room.number;
+    carouselItems.set(room.number, el);
     fragment.appendChild(el);
   });
 
@@ -1286,11 +1167,12 @@ function updateSelectedRoomState(room, vibrate = false) {
   const changed = selectedRoom !== room;
   selectedRoom = room;
 
-  const items = carousel.querySelectorAll('.num-item');
-  items.forEach(item => {
-    const isCur = item.dataset.number === room.number;
-    item.classList.toggle('active', isCur);
-  });
+  if (activeCarouselItem) activeCarouselItem.classList.remove('active');
+  const currentItem = carouselItems.get(room.number);
+  if (currentItem) {
+    currentItem.classList.add('active');
+    activeCarouselItem = currentItem;
+  }
 
   descRoomTitle.textContent = `Номер ${room.number}`;
   const isSuite = room.type === 'suite';
@@ -1302,10 +1184,10 @@ function updateSelectedRoomState(room, vibrate = false) {
 }
 
 function selectRoomByNumber(numStr, vibrate = true, behavior = 'smooth') {
-  const room = ALL_ROOMS.find(r => r.number === String(numStr));
+  const room = ROOM_BY_NUMBER.get(String(numStr));
   if (!room) return;
 
-  const el = carousel.querySelector(`[data-number="${room.number}"]`);
+  const el = carouselItems.get(room.number);
   if (el) {
     updateSelectedRoomState(room, vibrate);
     el.scrollIntoView({ behavior, inline: 'center', block: 'nearest' });
@@ -1334,7 +1216,7 @@ function updateNumberFromScroll() {
   });
 
   if (closest) {
-    const room = ALL_ROOMS.find(r => r.number === closest.dataset.number);
+    const room = ROOM_BY_NUMBER.get(closest.dataset.number);
     if (room) updateSelectedRoomState(room, true);
   }
 }
@@ -1360,60 +1242,39 @@ let sheetHeight = window.innerHeight * 0.82;
 let rafId = null;
 
 function renderDrawerRooms(filterQuery = '') {
-  sheetContent.innerHTML = '';
   const q = filterQuery.trim().toLowerCase();
-  const floors = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
-
+  const parts = [];
   let hasAny = false;
 
-  floors.forEach(floorNum => {
-    let floorRooms = ALL_ROOMS.filter(r => r.floor === floorNum);
-    if (q) floorRooms = floorRooms.filter(r => r.number.toLowerCase().includes(q));
-
-    if (floorRooms.length === 0) return;
+  for (const floorNum of FLOORS) {
+    const floorRooms = ALL_ROOMS.filter(r => r.floor === floorNum && (!q || r.number.includes(q)));
+    if (!floorRooms.length) continue;
     hasAny = true;
 
     const suitesCount = floorRooms.filter(r => r.type === 'suite').length;
-    const stdsCount = floorRooms.filter(r => r.type === 'standard').length;
+    const stdsCount = floorRooms.length - suitesCount;
+    const stats = [
+      suitesCount ? `${suitesCount} люкс` : '',
+      stdsCount ? `${stdsCount} станд.` : ''
+    ].filter(Boolean).join(', ');
 
-    const section = document.createElement('div');
-    section.className = 'floor-section';
-
-    const header = document.createElement('div');
-    header.className = 'floor-header';
-    header.innerHTML = `
-      <span>${floorNum} этаж</span>
-      <span class="floor-stats">${floorRooms.length} номеров (${suitesCount > 0 ? suitesCount + ' люкс' : ''}${suitesCount > 0 && stdsCount > 0 ? ', ' : ''}${stdsCount > 0 ? stdsCount + ' станд.' : ''})</span>
-    `;
-
-    const grid = document.createElement('div');
-    grid.className = 'room-grid';
-
-    floorRooms.forEach(room => {
-      const chip = document.createElement('div');
-      chip.className = `room-chip ${room.type === 'suite' ? 'suite' : ''} ${room.number === selectedRoom?.number ? 'selected' : ''}`;
-      chip.dataset.roomNumber = room.number;
-      chip.innerHTML = `
-        <span>${room.number}</span>
-        <span class="chip-type">${room.type === 'suite' ? 'Люкс' : 'Ст.'}</span>
-      `;
-
-      chip.addEventListener('click', () => {
-        selectRoomByNumber(room.number, true);
-        closeSheet();
-      });
-
-      grid.appendChild(chip);
-    });
-
-    section.appendChild(header);
-    section.appendChild(grid);
-    sheetContent.appendChild(section);
-  });
-
-  if (!hasAny) {
-    sheetContent.innerHTML = `<div style="text-align: center; color: var(--text-dim); padding: 40px 0;">Номера не найдены</div>`;
+    parts.push(`<div class="floor-section">
+      <div class="floor-header">
+        <span>${floorNum} этаж</span>
+        <span class="floor-stats">${floorRooms.length} номеров (${stats})</span>
+      </div>
+      <div class="room-grid">${floorRooms.map(room => `
+        <div class="room-chip ${room.type === 'suite' ? 'suite' : ''} ${room.number === selectedRoom?.number ? 'selected' : ''}" data-room-number="${room.number}">
+          <span>${room.number}</span>
+          <span class="chip-type">${room.type === 'suite' ? 'Люкс' : 'Ст.'}</span>
+        </div>`).join('')}
+      </div>
+    </div>`);
   }
+
+  sheetContent.innerHTML = hasAny
+    ? parts.join('')
+    : `<div style="text-align: center; color: var(--text-dim); padding: 40px 0;">Номера не найдены</div>`;
 }
 
 function updateDrawerSelectedChip(numStr) {
@@ -1492,6 +1353,12 @@ sheetHandleArea.addEventListener('click', () => {
 btnCloseSheet.addEventListener('click', closeSheet);
 sheetOverlay.addEventListener('click', closeSheet);
 sheetSearch.addEventListener('input', e => renderDrawerRooms(e.target.value));
+sheetContent.addEventListener('click', event => {
+  const chip = event.target.closest('.room-chip');
+  if (!chip) return;
+  selectRoomByNumber(chip.dataset.roomNumber, true);
+  closeSheet();
+});
 
 /* Actions */
 async function takePhoto() {
@@ -1499,40 +1366,36 @@ async function takePhoto() {
 
   isCapturing = true;
   setBusy(captureBtn, true);
+  triggerHaptic();
 
   try {
-    // Some iOS engines require explicit permission for DeviceOrientation.
-    await ensureOrientationSensorPermission();
-    await waitForOrientationSample();
-
-    // Freeze the physical orientation at the instant of shutter press.
     const captureAngle = getCaptureOrientationAngle();
+    const torchAlreadyOn = torchArmed;
 
-    let sourceBlob = null;
+    if (torchSupported) await armTorch();
+    if (torchArmed && !torchAlreadyOn) await wait(70);
+    else if (torchArmed) await waitForVideoFrame();
 
-    if (imageCapture && nativeFlashSupported) {
-      sourceBlob = await captureWithNativeFlash(captureAngle);
-    }
-
-    if (!sourceBlob) {
-      sourceBlob = await captureWithTorch(captureAngle);
-    }
-
-    if (!sourceBlob) {
-      throw new Error('Photo capture failed');
-    }
-
-    showPreview(sourceBlob);
-
-    await triggerHaptic();
-  } catch (error) {
+    drawRotatedVideoToCanvas(captureAngle);
+    showPreviewFromCanvas();
+    encodePreviewBlob();
+  } catch (_) {
     showMessage('Ошибка при снимке');
   } finally {
     isCapturing = false;
     setBusy(captureBtn, false);
+    torchArmed = false;
+    torchPromise = null;
+    setTorch(false);
   }
 }
 
+captureBtn.addEventListener('pointerdown', () => {
+  ensureOrientationSensorPermission();
+  armTorch();
+}, { passive: true });
+
+captureBtn.addEventListener('pointercancel', disarmTorch);
 captureBtn.addEventListener('click', takePhoto);
 btnRetake.addEventListener('click', () => { resetPhoto(); triggerHaptic(); });
 
@@ -1557,8 +1420,8 @@ btnSend.addEventListener('click', async () => {
   }, 500);
 });
 
-btnEmpty.addEventListener('click', async () => {
-  await triggerHaptic();
+btnEmpty.addEventListener('click', () => {
+  triggerHaptic();
   if (queueRemaining > 0) queueRemaining--;
   updateQueueDisplay();
   showMessage(`№ ${selectedRoom.number} помечен как «Опустошён»`);
