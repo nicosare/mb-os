@@ -815,15 +815,16 @@ function getCaptureOrientationAngle() {
   return normalizeAngle(currentDeviceAngle);
 }
 
-window.addEventListener('orientationchange', () => {
+function syncViewportAfterOrientationChange() {
   updateOrientationFromScreen();
-  syncLiveViewportAspect();
-});
+  // While a still preview is shown, keep the photo's own aspect.
+  // Live camera aspect must not overwrite the rotated preview frame.
+  if (!isPreview) syncLiveViewportAspect();
+}
+
+window.addEventListener('orientationchange', syncViewportAfterOrientationChange);
 if (window.screen && window.screen.orientation) {
-  window.screen.orientation.addEventListener('change', () => {
-    updateOrientationFromScreen();
-    syncLiveViewportAspect();
-  });
+  window.screen.orientation.addEventListener('change', syncViewportAfterOrientationChange);
 }
 updateOrientationFromScreen();
 
@@ -947,6 +948,33 @@ async function ensureOrientationSensorPermission() {
   return true;
 }
 
+function waitForOrientationSample(timeoutMs = 400) {
+  if (Date.now() - lastSensorOrientationAt < 1500) {
+    return Promise.resolve(true);
+  }
+
+  return new Promise(resolve => {
+    let settled = false;
+
+    const finish = ok => {
+      if (settled) return;
+      settled = true;
+      window.removeEventListener('deviceorientation', onSample, true);
+      window.removeEventListener('deviceorientationabsolute', onSample, true);
+      clearTimeout(timer);
+      resolve(ok);
+    };
+
+    const onSample = () => {
+      if (Date.now() - lastSensorOrientationAt < 1500) finish(true);
+    };
+
+    const timer = setTimeout(() => finish(false), timeoutMs);
+    window.addEventListener('deviceorientation', onSample, true);
+    window.addEventListener('deviceorientationabsolute', onSample, true);
+  });
+}
+
 /* Camera capture helpers */
 function wait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -1037,7 +1065,10 @@ async function captureWithNativeFlash(angle) {
   try {
     const blob = await imageCapture.takePhoto({ fillLightMode: 'flash' });
     if (!(blob instanceof Blob) || !blob.size) return null;
-    return blob;
+    // takePhoto ignores device tilt and may only store rotation in EXIF.
+    // Bake the same gravity-correct rotation used for the video fallback.
+    await drawRotatedStillToCanvas(blob, angle);
+    return await canvasToBlob(canvas);
   } catch (_) {
     return null;
   }
@@ -1096,39 +1127,60 @@ async function startCamera() {
 /* Correct photo orientation on Canvas.
    The pixels themselves are rotated; the resulting JPEG does not depend
    on the phone's later orientation or on EXIF metadata. */
-function drawRotatedVideoToCanvas(angle = getCaptureOrientationAngle()) {
-  const vW = video.videoWidth;
-  const vH = video.videoHeight;
-  if (!vW || !vH) throw new Error('Frame error');
+function drawRotatedSourceToCanvas(source, srcW, srcH, angle = getCaptureOrientationAngle()) {
+  if (!srcW || !srcH) throw new Error('Frame error');
 
   angle = normalizeAngle(angle);
 
   if (angle === 90 || angle === 270) {
-    canvas.width = vH;
-    canvas.height = vW;
+    canvas.width = srcH;
+    canvas.height = srcW;
   } else {
-    canvas.width = vW;
-    canvas.height = vH;
+    canvas.width = srcW;
+    canvas.height = srcH;
   }
 
   const ctx = canvas.getContext('2d', { alpha: false });
   ctx.save();
 
   if (angle === 90) {
-    ctx.translate(vH, 0);
+    ctx.translate(srcH, 0);
     ctx.rotate(Math.PI / 2);
   } else if (angle === 180) {
-    ctx.translate(vW, vH);
+    ctx.translate(srcW, srcH);
     ctx.rotate(Math.PI);
   } else if (angle === 270) {
-    ctx.translate(0, vW);
+    ctx.translate(0, srcW);
     ctx.rotate(-Math.PI / 2);
   }
 
-  ctx.drawImage(video, 0, 0, vW, vH);
+  ctx.drawImage(source, 0, 0, srcW, srcH);
   ctx.restore();
 
   return canvas;
+}
+
+function drawRotatedVideoToCanvas(angle = getCaptureOrientationAngle()) {
+  return drawRotatedSourceToCanvas(video, video.videoWidth, video.videoHeight, angle);
+}
+
+async function drawRotatedStillToCanvas(blob, angle) {
+  let bitmap = null;
+
+  try {
+    // Keep sensor-native pixels; we apply captureAngle ourselves.
+    // Otherwise EXIF-aware decode + sensor rotation would double-rotate.
+    try {
+      bitmap = await createImageBitmap(blob, { imageOrientation: 'none' });
+    } catch (_) {
+      bitmap = await createImageBitmap(blob);
+    }
+
+    drawRotatedSourceToCanvas(bitmap, bitmap.width, bitmap.height, angle);
+    return canvas;
+  } finally {
+    if (bitmap && typeof bitmap.close === 'function') bitmap.close();
+  }
 }
 
 function canvasToBlob(sourceCanvas) {
@@ -1153,7 +1205,17 @@ function releasePreviewUrl() {
 function showPreview(source) {
   releasePreviewUrl();
 
+  // Oriented JPEG size is already on the canvas. Do not wait for <img>
+  // naturalWidth: some engines report unrotated pixel size (EXIF).
+  if (canvas.width && canvas.height) {
+    setViewportAspect(canvas.width, canvas.height);
+  }
+
   photo.onload = () => {
+    if (canvas.width && canvas.height) {
+      setViewportAspect(canvas.width, canvas.height);
+      return;
+    }
     setViewportAspect(photo.naturalWidth, photo.naturalHeight);
   };
 
@@ -1441,6 +1503,7 @@ async function takePhoto() {
   try {
     // Some iOS engines require explicit permission for DeviceOrientation.
     await ensureOrientationSensorPermission();
+    await waitForOrientationSample();
 
     // Freeze the physical orientation at the instant of shutter press.
     const captureAngle = getCaptureOrientationAngle();
