@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Терминал</title>
   
-  <!-- VK Bridge из официального CDN VK -->
+  <!-- Загрузка VK Bridge из CDN -->
   <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/index.umd.js"></script>
 
   <style>
@@ -22,56 +22,85 @@
       text-align: center;
       padding: 20px;
     }
-    h1 { font-size: 24px; margin-bottom: 12px; color: #3f8ae0; }
-    p { font-size: 16px; color: #aaa; margin-bottom: 24px; }
+    .card {
+      background: #1e1e1e;
+      padding: 24px;
+      border-radius: 20px;
+      border: 1px solid #333;
+      max-width: 320px;
+      width: 100%;
+    }
+    h1 { font-size: 20px; margin-bottom: 12px; color: #3f8ae0; }
+    p { font-size: 14px; color: #aaa; margin-bottom: 16px; word-break: break-word; }
     .btn {
       background: #3f8ae0;
       color: #fff;
       border: none;
-      padding: 16px 32px;
+      padding: 14px 28px;
       border-radius: 24px;
-      font-size: 18px;
+      font-size: 16px;
       font-weight: bold;
+      width: 100%;
       cursor: pointer;
     }
+    .btn:active { opacity: 0.8; }
   </style>
 </head>
 <body>
 
-  <h1>VK Mini App Подключен!</h1>
-  <p id="status">Инициализация VK Bridge...</p>
-  <button class="btn" id="btnTest">Тест вибрации</button>
+  <div class="card">
+    <h1 id="title">Подключение...</h1>
+    <p id="status">Поиск VK Bridge...</p>
+    <button class="btn" id="btnTest">Тест вибрации</button>
+  </div>
 
   <script>
-    // 1. Быстрый вызов сигналов VK
-    function initApp() {
-      const statusElem = document.getElementById('status');
-      
-      if (window.vkBridge) {
-        window.vkBridge.send('VKWebAppInit')
+    const titleElem = document.getElementById('title');
+    const statusElem = document.getElementById('status');
+    const btnTest = document.getElementById('btnTest');
+
+    let attempts = 0;
+
+    function initVKBridge() {
+      attempts++;
+
+      // Ищем объект vkBridge в глобальном контексте
+      const bridge = window.vkBridge || (window.vkBridgeDefault && window.vkBridgeDefault.default);
+
+      if (bridge && typeof bridge.send === 'function') {
+        titleElem.innerText = '🚀 Mini App Готов!';
+        statusElem.innerText = 'VK Bridge успешно найден. Связь с VK установлена.';
+        statusElem.style.color = '#4bb34b';
+
+        // Отправляем сигнал готовности в ВК
+        bridge.send('VKWebAppInit')
           .then(() => {
-            statusElem.innerText = 'Успешно! Приложение работает внутри VK.';
-            statusElem.style.color = '#4bb34b';
+            console.log('VKWebAppInit успешно отправлен');
           })
           .catch((err) => {
             statusElem.innerText = 'Ошибка инициализации: ' + JSON.stringify(err);
+            statusElem.style.color = '#e64646';
           });
+
+        // Назначаем проверку функции
+        btnTest.onclick = () => {
+          bridge.send('VKWebAppTapticImpactOccurred', { style: 'heavy' });
+          alert('Сигнал связи с VK сработал!');
+        };
+
+      } else if (attempts < 50) {
+        // Если JS с CDN еще качается — проверяем каждые 100мс (до 5 секунд)
+        statusElem.innerText = `Ожидание загрузки VK Bridge (${attempts}/50)...`;
+        setTimeout(initVKBridge, 100);
       } else {
-        statusElem.innerText = 'VK Bridge не найден (запущено вне VK)';
+        titleElem.innerText = '⚠️ Ошибка сеть';
+        statusElem.innerText = 'Не удалось загрузить файл VK Bridge с CDN. Проверьте интернет.';
+        statusElem.style.color = '#e64646';
       }
     }
 
-    document.getElementById('btnTest').addEventListener('click', () => {
-      if (window.vkBridge) {
-        window.vkBridge.send('VKWebAppTapticImpactOccurred', { style: 'heavy' });
-        alert('Клик сработал!');
-      } else {
-        alert('Запущено в браузере');
-      }
-    });
-
-    // Запуск после загрузки DOM
-    document.addEventListener('DOMContentLoaded', initApp);
+    // Запускаем отслеживание после загрузки страницы
+    document.addEventListener('DOMContentLoaded', initVKBridge);
   </script>
 </body>
 </html>
