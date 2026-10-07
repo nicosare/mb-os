@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>VK Mini App - Фотофиксация</title>
+  
+  <!-- Подключение VK Bridge API -->
+  <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/index.umd.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      background-color: #000;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    /* Верхний статус-бар */
+    .header-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 50px;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 20;
+    }
+
+    .active-badge {
+      background: rgba(63, 138, 224, 0.9);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 15px;
+    }
+
+    /* Область камеры / превью */
+    .viewport {
+      flex: 1;
+      position: relative;
+      background: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    video, img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Эффект экранной вспышки */
+    .screen-flash {
+      position: absolute;
+      inset: 0;
+      background-color: #fff;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 15;
+      transition: opacity 0.05s ease-out;
+    }
+
+    .screen-flash.active {
+      opacity: 1;
+    }
+
+    /* Кнопки поверх камеры */
+    .controls-overlay {
+      position: absolute;
+      bottom: 20px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      z-index: 20;
+      padding: 0 16px;
+    }
+
+    .btn {
+      background: #3f8ae0;
+      color: #fff;
+      border: none;
+      padding: 14px 20px;
+      border-radius: 28px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      transition: transform 0.1s, background 0.2s;
+    }
+
+    .btn:active {
+      transform: scale(0.96);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-warning {
+      background: #e64646;
+    }
+
+    /* Нижный горизонтальный селектор номеров */
+    .picker-container {
+      height: 90px;
+      background: rgba(18, 18, 18, 0.95);
+      position: relative;
+      display: flex;
+      align-items: center;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .picker-focus-ring {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 56px;
+      height: 56px;
+      border: 2px solid #3f8ae0;
+      border-radius: 50%;
+      pointer-events: none;
+      box-shadow: 0 0 10px rgba(63, 138, 224, 0.5);
+      z-index: 5;
+    }
+
+    .picker-list {
+      display: flex;
+      overflow-x: scroll;
+      scroll-snap-type: x mandatory;
+      padding: 0 calc(50vw - 28px);
+      scrollbar-width: none;
+      width: 100%;
+      align-items: center;
+    }
+
+    .picker-list::-webkit-scrollbar {
+      display: none;
+    }
+
+    .picker-item {
+      flex: 0 0 56px;
+      height: 56px;
+      scroll-snap-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #888;
+      font-size: 18px;
+      font-weight: bold;
+      transition: color 0.15s, transform 0.15s;
+    }
+
+    .picker-item.active {
+      color: #fff;
+      font-size: 22px;
+      transform: scale(1.15);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Шапка -->
+    <div class="header-bar">
+      <span>VK Mini App Test</span>
+      <div class="active-badge" id="activeBadge">№ 1</div>
+    </div>
+
+    <!-- Вспышка экраном -->
+    <div class="screen-flash" id="flashOverlay"></div>
+
+    <!-- Камера / Превью -->
+    <div class="viewport">
+      <video id="videoElem" autoplay playsinline muted></video>
+      <img id="previewImg" style="display: none;" alt="Preview" />
+
+      <!-- Оверлей кнопок управления -->
+      <div class="controls-overlay" id="controlsCamera">
+        <button class="btn btn-secondary" id="btnEmpty">Опустошен</button>
+        <button class="btn" id="btnTakePhoto">📸 Сделать фото</button>
+      </div>
+
+      <div class="controls-overlay" id="controlsPreview" style="display: none;">
+        <button class="btn btn-secondary" id="btnRetake">Переснять</button>
+        <button class="btn" id="btnSend">🚀 Отправить</button>
+      </div>
+    </div>
+
+    <!-- Барабан номеров -->
+    <div class="picker-container">
+      <div class="picker-focus-ring"></div>
+      <div class="picker-list" id="pickerList"></div>
+    </div>
+  </div>
+
+  <script>
+    // 1. Инициализация VK Bridge
+    if (window.vkBridge) {
+      vkBridge.send('VKWebAppInit')
+        .then(() => console.log('VK Bridge успешно инициализирован'))
+        .catch(err => console.error('Ошибка инициализации VK Bridge:', err));
+    }
+
+    // Тестовый массив номеров
+    const NUMBERS = Array.from({ length: 40 }, (_, i) => 101 + i);
+    let activeNumber = NUMBERS[0];
+    let mediaStream = null;
+    let capturedBlob = null;
+
+    const videoElem = document.getElementById('videoElem');
+    const previewImg = document.getElementById('previewImg');
+    const pickerList = document.getElementById('pickerList');
+    const activeBadge = document.getElementById('activeBadge');
+    const flashOverlay = document.getElementById('flashOverlay');
+
+    const controlsCamera = document.getElementById('controlsCamera');
+    const controlsPreview = document.getElementById('controlsPreview');
+
+    // 2. Генерация списка номеров в карусели
+    function initPicker() {
+      NUMBERS.forEach((num, index) => {
+        const item = document.createElement('div');
+        item.className = `picker-item ${index === 0 ? 'active' : ''}`;
+        item.innerText = num;
+        item.dataset.num = num;
+        item.addEventListener('click', () => {
+          item.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        });
+        pickerList.appendChild(item);
+      });
+
+      pickerList.addEventListener('scroll', handleScroll);
+    }
+
+    // Определение центрального элемента при скролле
+    function handleScroll() {
+      const containerRect = pickerList.getBoundingClientRect();
+      const containerCenter = containerRect.left + containerRect.width / 2;
+
+      let closestItem = null;
+      let minDistance = Infinity;
+
+      Array.from(pickerList.children).forEach(child => {
+        const childRect = child.getBoundingClientRect();
+        const childCenter = childRect.left + childRect.width / 2;
+        const distance = Math.abs(containerCenter - childCenter);
+
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestItem = child;
+        }
+      });
+
+      if (closestItem) {
+        const newActive = parseInt(closestItem.dataset.num, 10);
+        if (newActive !== activeNumber) {
+          activeNumber = newActive;
+          activeBadge.innerText = `№ ${activeNumber}`;
+          
+          Array.from(pickerList.children).forEach(child => child.classList.remove('active'));
+          closestItem.classList.add('active');
+
+          // Легкая вибрация при смене номера (VK Bridge)
+          if (window.vkBridge) {
+            vkBridge.send('VKWebAppTapticImpactOccurred', { style: 'light' }).catch(() => {});
+          }
+        }
+      }
+    }
+
+    // 3. Работа с камерой
+    async function startCamera() {
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
+          audio: false
+        });
+        videoElem.srcObject = mediaStream;
+      } catch (err) {
+        console.error('Ошибка доступа к камере:', err);
+        alert('Не удалось открыть камеру. Проверьте разрешения браузера.');
+      }
+    }
+
+    // 4. Съемка с авто-вспышкой
+    async function takePhoto() {
+      if (!mediaStream) return;
+
+      const track = mediaStream.getVideoTracks()[0];
+      let torchSuccess = false;
+
+      // Пробуем аппаратную вспышку
+      try {
+        const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+        if (capabilities.torch) {
+          await track.applyConstraints({ advanced: [{ torch: true }] });
+          torchSuccess = true;
+        }
+      } catch (e) {
+        console.warn('Аппаратная вспышка недоступна:', e);
+      }
+
+      // Если нет аппаратной вспышки — экраном
+      if (!torchSuccess) {
+        flashOverlay.classList.add('active');
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 150));
+
+      // Фиксируем кадр через Canvas
+      const canvas = document.createElement('canvas');
+      canvas.width = videoElem.videoWidth || 1280;
+      canvas.height = videoElem.videoHeight || 720;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
+
+      // Отключаем вспышки
+      if (torchSuccess) {
+        try { await track.applyConstraints({ advanced: [{ torch: false }] }); } catch (e) {}
+      } else {
+        flashOverlay.classList.remove('active');
+      }
+
+      // Переходим в превью
+      canvas.toBlob((blob) => {
+        capturedBlob = blob;
+        previewImg.src = URL.createObjectURL(blob);
+        videoElem.style.display = 'none';
+        previewImg.style.display = 'block';
+
+        controlsCamera.style.display = 'none';
+        controlsPreview.style.display = 'flex';
+      }, 'image/jpeg', 0.9);
+    }
+
+    // Сброс на камеру
+    function resetToCamera() {
+      capturedBlob = null;
+      previewImg.style.display = 'none';
+      videoElem.style.display = 'block';
+
+      controlsPreview.style.display = 'none';
+      controlsCamera.style.display = 'flex';
+    }
+
+    // 5. Обработчики кнопок
+    document.getElementById('btnTakePhoto').addEventListener('click', takePhoto);
+    document.getElementById('btnRetake').addEventListener('click', resetToCamera);
+
+    document.getElementById('btnSend').addEventListener('click', () => {
+      alert(`[ТЕСТ] Отправка снимка для номера №${activeNumber} в беседу!`);
+      resetToCamera();
+    });
+
+    document.getElementById('btnEmpty').addEventListener('click', () => {
+      alert(`[ТЕСТ] Номер №${activeNumber} помечен как «Опустошен»!`);
+    });
+
+    // Старт
+    initPicker();
+    startCamera();
+  </script>
+</body>
+</html>
