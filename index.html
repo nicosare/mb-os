@@ -1418,19 +1418,37 @@ btnSend.addEventListener('click', async () => {
   setBusy(btnSend, true);
   btnSend.textContent = 'Отправка…';
 
-  await new Promise(r => setTimeout(r, 500));
+  try {
+    const blob = await encodePreviewBlob();
+    if (!blob) throw new Error('Нет снимка');
 
-  if (queueRemaining > 0) queueRemaining--;
-  updateQueueDisplay();
+    const formData = new FormData();
+    formData.append('photo', blob, 'photo.jpg');
+    formData.append('roomNumber', selectedRoom.number);
 
-  btnSend.textContent = 'Отправлено';
-  await triggerHaptic();
+    const response = await fetch('https://tintink.ru/vk-proxy/send-photo', {
+      method: 'POST',
+      body: formData
+    });
 
-  setTimeout(() => {
+    if (!response.ok) throw new Error('Ошибка сервера');
+
+    if (queueRemaining > 0) queueRemaining--;
+    updateQueueDisplay();
+
+    btnSend.textContent = 'Отправлено';
+    await triggerHaptic();
+
+    setTimeout(() => {
+      btnSend.textContent = 'Отправить';
+      setBusy(btnSend, false);
+      resetPhoto();
+    }, 500);
+  } catch (err) {
+    showMessage('Ошибка при отправке');
     btnSend.textContent = 'Отправить';
     setBusy(btnSend, false);
-    resetPhoto();
-  }, 500);
+  }
 });
 
 btnEmpty.addEventListener('click', () => {
