@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#000000">
-<title>VK Camera Terminal</title>
+<title>MINIBAR OS</title>
 <style>
   :root {
     --accent: #2688eb;
@@ -99,7 +99,7 @@
     letter-spacing: 0.3px;
   }
 
-  /* Main View Area (Flex layout to stretch camera) */
+  /* Main View Area */
   .main-content {
     flex: 1;
     display: flex;
@@ -111,7 +111,7 @@
     overflow: hidden;
   }
 
-  /* Viewfinder (Expanded) */
+  /* Viewfinder */
   .viewport-container {
     position: relative;
     width: 100%;
@@ -212,7 +212,7 @@
     cursor: pointer;
   }
 
-  /* Carousel Section (Under Camera) */
+  /* Carousel Section */
   .carousel-wrap {
     width: 100%;
     max-width: 440px;
@@ -280,7 +280,7 @@
     text-shadow: 0 0 12px rgba(255, 204, 0, 0.3);
   }
 
-  /* Room Description Box (Moved UNDER Carousel) */
+  /* Room Description Box */
   .room-description-box {
     width: 100%;
     max-width: 440px;
@@ -410,7 +410,7 @@
     box-shadow: 0 4px 14px rgba(38,136,235,.30);
   }
 
-  /* ---------- Highly Optimized Bottom Sheet ---------- */
+  /* Bottom Sheet */
   .sheet-overlay {
     position: fixed;
     inset: 0;
@@ -595,7 +595,7 @@
 
   .room-chip.selected .chip-type { color: rgba(0, 0, 0, 0.7); }
 
-  /* Utility Components */
+  /* Notification Message */
   .camera-message {
     position: fixed;
     left: 50%;
@@ -618,25 +618,9 @@
 
   .camera-message.visible { opacity: 1; transform: translate3d(-50%, 0, 0); }
 
-  .flash-effect {
-    position: fixed;
-    inset: 0;
-    z-index: 250;
-    pointer-events: none;
-    background: #fff;
-    opacity: 0;
-  }
-
-  .flash-effect.fire { animation: cameraFlash .16s ease-out both; }
-
   .hidden { display: none !important; }
 
   @keyframes spin { to { transform: rotate(360deg); } }
-  @keyframes cameraFlash {
-    0% { opacity: 0; }
-    35% { opacity: .96; }
-    100% { opacity: 0; }
-  }
 
   @media (min-width: 700px) {
     :root { --page-pad: 20px; }
@@ -654,13 +638,13 @@
   <!-- Top Header with Queue Indicator -->
   <header class="top-bar">
     <div class="hotel-info">
-      <div class="hotel-title">Hyatt Regency Terminal</div>
-      <div class="queue-count" id="queueCount">В очереди: 14 номеров</div>
+      <div class="hotel-title">MINIBAR OS</div>
+      <div class="queue-count" id="queueCount">В очереди: 0 номеров</div>
     </div>
     <div class="room-badge" id="roomBadge">№ 500</div>
   </header>
 
-  <!-- Main View Area (Expanded Camera viewport) -->
+  <!-- Main View Area -->
   <main class="main-content">
     <!-- Camera Viewfinder -->
     <div class="viewport-container">
@@ -684,14 +668,14 @@
       </div>
     </div>
 
-    <!-- Room Carousel (Placed directly under Camera) -->
+    <!-- Room Carousel -->
     <div class="carousel-wrap" id="carouselWrap">
       <div class="carousel-fade left"></div>
       <div class="carousel" id="carousel" aria-label="Выбор номера"></div>
       <div class="carousel-fade right"></div>
     </div>
 
-    <!-- Description Card (Moved BELOW Carousel) -->
+    <!-- Description Card -->
     <div class="room-description-box" id="roomDescription">
       <div class="desc-header">
         <span class="desc-title" id="descRoomTitle">Номер 500</span>
@@ -731,37 +715,34 @@
   </footer>
 </div>
 
-<!-- Lag-free Bottom Sheet Modal -->
+<!-- Bottom Sheet Modal -->
 <div class="sheet-overlay" id="sheetOverlay"></div>
 <div class="bottom-sheet" id="bottomSheet">
   <div class="sheet-handle-bar" id="sheetHandleArea">
     <div class="sheet-handle"></div>
-    <div class="sheet-peek-title" id="sheetPeekTitle">Показать все номера (293)</div>
+    <div class="sheet-peek-title" id="sheetPeekTitle">Показать все номера</div>
   </div>
 
   <div class="sheet-header">
     <div class="sheet-title-row">
       <div>
         <div class="sheet-title">Все номера отеля</div>
-        <div class="sheet-subtitle">293 номера (67 люксов, 226 стандартов)</div>
+        <div class="sheet-subtitle" id="sheetSubtitle">293 номера</div>
       </div>
       <button class="btn-close-sheet" id="btnCloseSheet" type="button">Закрыть</button>
     </div>
     <input type="search" class="sheet-search" id="sheetSearch" placeholder="Поиск номера...">
   </div>
 
-  <div class="sheet-content" id="sheetContent">
-    <!-- Generated room list -->
-  </div>
+  <div class="sheet-content" id="sheetContent"></div>
 </div>
 
 <div class="camera-message" id="message"></div>
-<div class="flash-effect" id="flashEffect"></div>
 
 <script type="module">
 import bridge from 'https://cdn.jsdelivr.net/npm/@vkontakte/vk-bridge@3.0.2/+esm';
 
-/* Rooms Data */
+/* Rooms Data Generator */
 function generateRoomsData() {
   const rooms = [];
   [500, 509, 534].forEach(n => rooms.push({ number: String(n), floor: 5, type: 'suite' }));
@@ -788,7 +769,37 @@ function generateRoomsData() {
 }
 
 const ALL_ROOMS = generateRoomsData();
-let queueRemaining = 14; // Queue length state
+let queueRemaining = ALL_ROOMS.length; // Инициализация реальным количеством из базы
+
+/* Orientation Tracking (Screen & Device Sensor) */
+let currentDeviceAngle = 0;
+
+function updateOrientation() {
+  if (window.screen && window.screen.orientation && typeof window.screen.orientation.angle === 'number') {
+    currentDeviceAngle = window.screen.orientation.angle;
+  } else if (typeof window.orientation === 'number') {
+    currentDeviceAngle = window.orientation;
+  }
+}
+
+window.addEventListener('orientationchange', updateOrientation);
+if (window.screen && window.screen.orientation) {
+  window.screen.orientation.addEventListener('change', updateOrientation);
+}
+updateOrientation();
+
+if (window.DeviceOrientationEvent) {
+  window.addEventListener('deviceorientation', (e) => {
+    if (e.beta === null || e.gamma === null) return;
+    const g = e.gamma;
+    const b = e.beta;
+    if (Math.abs(g) > 45 && Math.abs(b) < 60) {
+      currentDeviceAngle = g > 0 ? 90 : 270;
+    } else if (Math.abs(b) > 45 && Math.abs(g) < 40) {
+      currentDeviceAngle = b < 0 ? 180 : 0;
+    }
+  }, true);
+}
 
 /* Elements */
 const video = document.getElementById('camera');
@@ -810,7 +821,6 @@ const carouselWrap = document.getElementById('carouselWrap');
 const roomBadge = document.getElementById('roomBadge');
 const queueCount = document.getElementById('queueCount');
 const message = document.getElementById('message');
-const flashEffect = document.getElementById('flashEffect');
 
 const descRoomTitle = document.getElementById('descRoomTitle');
 const descRoomTag = document.getElementById('descRoomTag');
@@ -821,10 +831,11 @@ const bottomSheet = document.getElementById('bottomSheet');
 const sheetContent = document.getElementById('sheetContent');
 const sheetSearch = document.getElementById('sheetSearch');
 const sheetHandleArea = document.getElementById('sheetHandleArea');
+const sheetPeekTitle = document.getElementById('sheetPeekTitle');
+const sheetSubtitle = document.getElementById('sheetSubtitle');
 
 let stream = null;
 let videoTrack = null;
-let imageCapture = null;
 let selectedRoom = ALL_ROOMS[0];
 let previewUrl = null;
 let snapTimer = null;
@@ -868,7 +879,22 @@ async function triggerHaptic() {
   } catch (_) {}
 }
 
-/* Camera Logic */
+/* Hardware Torch (Flashlight) triggering without screen flash */
+async function triggerFlash() {
+  if (videoTrack && typeof videoTrack.getCapabilities === 'function') {
+    try {
+      const caps = videoTrack.getCapabilities();
+      if (caps.torch) {
+        await videoTrack.applyConstraints({ advanced: [{ torch: true }] });
+        setTimeout(async () => {
+          try { await videoTrack.applyConstraints({ advanced: [{ torch: false }] }); } catch (_) {}
+        }, 220);
+      }
+    } catch (_) {}
+  }
+}
+
+/* Camera Stream Control */
 async function stopCamera() {
   if (stream) {
     for (const track of stream.getTracks()) {
@@ -877,7 +903,6 @@ async function stopCamera() {
   }
   stream = null;
   videoTrack = null;
-  imageCapture = null;
   video.srcObject = null;
   video.classList.remove('ready');
 }
@@ -899,10 +924,6 @@ async function startCamera() {
     videoTrack = stream.getVideoTracks()[0] || null;
     video.srcObject = stream;
 
-    if ('ImageCapture' in window && videoTrack) {
-      try { imageCapture = new ImageCapture(videoTrack); } catch (_) {}
-    }
-
     await video.play();
     video.classList.add('ready');
 
@@ -916,22 +937,40 @@ async function startCamera() {
   }
 }
 
-function runVisualFlash() {
-  flashEffect.classList.remove('fire');
-  void flashEffect.offsetWidth;
-  flashEffect.classList.add('fire');
-}
-
-function drawVideoToCanvas() {
+/* Correct photo orientation on Canvas */
+function drawRotatedVideoToCanvas() {
   const vW = video.videoWidth;
   const vH = video.videoHeight;
   if (!vW || !vH) throw new Error('Frame error');
 
-  canvas.width = vW;
-  canvas.height = vH;
+  const angle = ((currentDeviceAngle % 360) + 360) % 360;
+
+  if (angle === 90 || angle === 270) {
+    canvas.width = vH;
+    canvas.height = vW;
+  } else {
+    canvas.width = vW;
+    canvas.height = vH;
+  }
+
   const ctx = canvas.getContext('2d', { alpha: false });
+  ctx.save();
+
+  if (angle === 90) {
+    ctx.translate(vH, 0);
+    ctx.rotate((90 * Math.PI) / 180);
+  } else if (angle === 180) {
+    ctx.translate(vW, vH);
+    ctx.rotate((180 * Math.PI) / 180);
+  } else if (angle === 270) {
+    ctx.translate(0, vW);
+    ctx.rotate((270 * Math.PI) / 180);
+  }
+
   ctx.drawImage(video, 0, 0, vW, vH);
-  return canvas.toDataURL('image/jpeg', .92);
+  ctx.restore();
+
+  return canvas.toDataURL('image/jpeg', 0.92);
 }
 
 function releasePreviewUrl() {
@@ -991,6 +1030,11 @@ function buildCarousel() {
   });
 
   carousel.appendChild(fragment);
+
+  const totalSuites = ALL_ROOMS.filter(r => r.type === 'suite').length;
+  const totalStds = ALL_ROOMS.length - totalSuites;
+  sheetPeekTitle.textContent = `Показать все номера (${ALL_ROOMS.length})`;
+  sheetSubtitle.textContent = `${ALL_ROOMS.length} номеров (${totalSuites} люксов, ${totalStds} стандартов)`;
 
   requestAnimationFrame(() => {
     selectRoomByNumber(ALL_ROOMS[0].number, false, 'auto');
@@ -1068,7 +1112,7 @@ carousel.addEventListener('click', event => {
   selectRoomByNumber(item.dataset.number);
 });
 
-/* ---------- Smooth GPU-Accelerated Bottom Sheet ---------- */
+/* Bottom Sheet Drawer */
 let isSheetOpen = false;
 let startY = 0;
 let currentY = 0;
@@ -1216,14 +1260,10 @@ async function takePhoto() {
   isCapturing = true;
   setBusy(captureBtn, true);
 
-  try {
-    let source = null;
-    if (imageCapture) {
-      try { source = await imageCapture.takePhoto(); } catch (_) {}
-    }
-    if (!source) source = drawVideoToCanvas();
+  triggerFlash();
 
-    runVisualFlash();
+  try {
+    const source = drawRotatedVideoToCanvas();
     showPreview(source);
     await triggerHaptic();
   } catch (error) {
