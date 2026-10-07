@@ -3,77 +3,325 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<meta name="theme-color" content="#000000">
-<title>VK Camera</title>
+<meta name="theme-color" content="#0a0b0e">
+<title>VK Терминал</title>
 <style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
-body{color:#fff}
-#app{position:fixed;inset:0;background:#000;overflow:hidden}
-#camera{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#111}
-#photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;background:#000}
-.flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:20}
-.flash.go{animation:flash .18s ease-out}
-@keyframes flash{0%{opacity:.95}100%{opacity:0}}
-.top{position:absolute;top:0;left:0;right:0;padding:calc(env(safe-area-inset-top) + 12px) 16px 0;display:flex;justify-content:flex-end;z-index:10}
-.status{background:rgba(0,0,0,.45);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:7px 11px;font-size:12px;opacity:.85}
-.bottom{position:absolute;left:0;right:0;bottom:0;padding:0 14px calc(env(safe-area-inset-bottom) + 18px);z-index:10}
-.carousel-wrap{margin:0 auto 18px;max-width:520px;position:relative}
-.carousel{height:62px;display:flex;align-items:center;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:0 calc(50% - 30px);overscroll-behavior-x:contain}
-.carousel::-webkit-scrollbar{display:none}
-.num{flex:0 0 60px;width:60px;height:50px;display:flex;align-items:center;justify-content:center;scroll-snap-align:center;font-size:19px;font-weight:600;color:rgba(255,255,255,.45);transition:transform .16s,color .16s,opacity .16s}
-.num.active{font-size:27px;color:#fff;transform:scale(1.08)}
-.center-line{position:absolute;left:50%;top:0;bottom:0;width:2px;transform:translateX(-50%);background:rgba(255,255,255,.92);border-radius:2px;pointer-events:none;opacity:.9}
-.actions{display:flex;align-items:center;justify-content:center;gap:28px}
-.action{height:50px;border:0;border-radius:16px;padding:0 20px;color:#fff;background:rgba(20,20,20,.65);backdrop-filter:blur(16px);font-size:15px;font-weight:600;border:1px solid rgba(255,255,255,.15)}
-.action:active{transform:scale(.96)}
-#capture{width:72px;height:72px;border-radius:50%;padding:0;background:#fff;border:5px solid rgba(255,255,255,.35);box-shadow:0 0 0 2px rgba(0,0,0,.25)}
-#capture:active{transform:scale(.92)}
-#capture span{display:block;width:56px;height:56px;background:#fff;border-radius:50%;box-shadow:inset 0 0 0 2px rgba(0,0,0,.08)}
-.preview-actions{display:none;gap:10px;max-width:420px;margin:auto}
-.preview-actions .action{flex:1}
-.send{background:#447bff;border-color:#447bff}
-.hidden{display:none!important}
-#start{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#000;z-index:30;padding:24px}
-.start-card{text-align:center;max-width:320px}
-.start-card h1{font-size:24px;margin:0 0 10px}
-.start-card p{font-size:14px;line-height:1.45;color:#aaa;margin:0 0 22px}
-.start-btn{border:0;background:#447bff;color:#fff;font-size:16px;font-weight:650;border-radius:14px;padding:13px 22px}
-.error{color:#ff7676!important}
+  :root {
+    --bg-main: #0a0b0e;
+    --surface: rgba(255, 255, 255, 0.08);
+    --surface-active: rgba(255, 255, 255, 0.16);
+    --border: rgba(255, 255, 255, 0.12);
+    --accent: #2688eb;
+    --accent-hover: #1e75d3;
+    --danger: #ff4e4e;
+    --text-primary: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.55);
+    --radius-lg: 24px;
+    --radius-md: 16px;
+    --radius-pill: 999px;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  
+  html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg-main);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+    color: var(--text-primary);
+  }
+
+  #app {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 16px);
+    background: radial-gradient(circle at top, #161922 0%, #0a0b0e 100%);
+  }
+
+  /* Верхний бар */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 10;
+    height: 40px;
+  }
+
+  .badge {
+    background: var(--surface);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #4bb34b;
+  }
+
+  /* Видоискатель камеры (Стандартное разрешение / 3:4) */
+  .viewfinder-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 0;
+    position: relative;
+  }
+
+  .viewfinder {
+    width: 100%;
+    max-width: 380px;
+    aspect-ratio: 3 / 4;
+    max-height: 52vh;
+    background: #12141a;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    position: relative;
+    border: 1px solid var(--border);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+  }
+
+  #camera, #photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  #photo { display: none; }
+
+  /* Эффект экранной вспышки */
+  .flash {
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 20;
+  }
+  .flash.go { animation: flashAnim 0.2s ease-out; }
+  @keyframes flashAnim { 0% { opacity: 0.9; } 100% { opacity: 0; } }
+
+  /* Карусель номеров */
+  .carousel-card {
+    background: var(--surface);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 8px 0;
+    position: relative;
+    margin-bottom: 14px;
+  }
+
+  .carousel-focus-ring {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 64px;
+    height: 48px;
+    background: rgba(38, 136, 235, 0.15);
+    border: 1.5px solid var(--accent);
+    border-radius: var(--radius-md);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .carousel {
+    height: 54px;
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    padding: 0 calc(50% - 32px);
+    overscroll-behavior-x: contain;
+  }
+  .carousel::-webkit-scrollbar { display: none; }
+
+  .num-item {
+    flex: 0 0 64px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    scroll-snap-align: center;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-muted);
+    transition: transform 0.15s, color 0.15s;
+    z-index: 3;
+    cursor: pointer;
+  }
+
+  .num-item.active {
+    font-size: 22px;
+    color: var(--text-primary);
+    transform: scale(1.1);
+  }
+
+  /* Нижняя панель действий */
+  .bottom-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .action-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .btn {
+    height: 52px;
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 0 20px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    background: var(--surface);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: transform 0.1s, background 0.15s;
+    flex: 1;
+  }
+
+  .btn:active { transform: scale(0.97); background: var(--surface-active); }
+  .btn-accent { background: var(--accent); border-color: var(--accent); }
+  .btn-accent:active { background: var(--accent-hover); }
+  .btn-danger { background: rgba(255, 78, 78, 0.15); color: var(--danger); border-color: rgba(255, 78, 78, 0.3); }
+
+  /* Кнопка спуска камеры */
+  #captureBtn {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    padding: 0;
+    background: #ffffff;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+    flex: none;
+  }
+  #captureBtn:active { transform: scale(0.92); }
+  #captureBtn span {
+    display: block;
+    width: 56px;
+    height: 56px;
+    margin: 4px auto;
+    background: #ffffff;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 2px rgba(0,0,0,0.1);
+  }
+
+  /* Экран приветствия / Доступ */
+  #startScreen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-main);
+    z-index: 50;
+    padding: 24px;
+  }
+
+  .start-card {
+    text-align: center;
+    max-width: 320px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 32px 24px;
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(20px);
+  }
+
+  .start-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+  }
+
+  .start-card h1 { font-size: 22px; margin: 0 0 10px; font-weight: 700; }
+  .start-card p { font-size: 14px; line-height: 1.5; color: var(--text-muted); margin: 0 0 24px; }
+
+  .hidden { display: none !important; }
 </style>
 </head>
 <body>
+
 <div id="app">
-  <video id="camera" autoplay playsinline muted></video>
-  <img id="photo" alt="Снимок">
-  <div class="flash" id="flash"></div>
-
-  <div class="top">
-    <div class="status" id="status">Инициализация…</div>
-  </div>
-
-  <div class="bottom">
-    <div class="carousel-wrap" id="carouselWrap">
-      <div class="center-line"></div>
-      <div class="carousel" id="carousel"></div>
+  <!-- Шапка -->
+  <div class="top-bar">
+    <div class="badge">
+      <div class="badge-dot"></div>
+      <span id="status">VK Mini App</span>
     </div>
-
-    <div class="actions" id="cameraActions">
-      <button class="action hidden" id="retakeTop">Переснять</button>
-      <button id="capture" aria-label="Сделать фото"><span></span></button>
-    </div>
-
-    <div class="preview-actions" id="previewActions">
-      <button class="action" id="retake">Переснять</button>
-      <button class="action send" id="send">Отправить</button>
+    <div class="badge" id="roomBadge">
+      № 01
     </div>
   </div>
 
-  <div id="start">
+  <!-- Видоискатель камеры -->
+  <div class="viewfinder-wrapper">
+    <div class="viewfinder">
+      <video id="camera" autoplay playsinline muted></video>
+      <img id="photo" alt="Снимок">
+      <div class="flash" id="flashOverlay"></div>
+    </div>
+  </div>
+
+  <!-- Карусель номеров -->
+  <div class="carousel-card" id="carouselCard">
+    <div class="carousel-focus-ring"></div>
+    <div class="carousel" id="carousel"></div>
+  </div>
+
+  <!-- Панель управления -->
+  <div class="bottom-controls">
+    <!-- Режим съемки -->
+    <div class="action-row" id="cameraControls">
+      <button class="btn btn-danger" id="btnEmpty">Опустошён</button>
+      <button id="captureBtn" aria-label="Сделать фото"><span></span></button>
+      <div style="flex:1;"></div> <!-- Распорка для симметрии -->
+    </div>
+
+    <!-- Режим превью после фото -->
+    <div class="action-row hidden" id="previewControls">
+      <button class="btn" id="btnRetake">Переснять</button>
+      <button class="btn btn-accent" id="btnSend">🚀 Отправить</button>
+    </div>
+  </div>
+
+  <!-- Начальный экран разблокировки камеры -->
+  <div id="startScreen">
     <div class="start-card">
-      <h1>Камера</h1>
-      <p id="startText">Разреши доступ к камере, чтобы запустить Mini App.</p>
-      <button class="start-btn" id="startBtn">Открыть камеру</button>
+      <div class="start-icon">📷</div>
+      <h1>Камера поля</h1>
+      <p id="startText">Разрешите доступ к камере для фиксирования отчетов и проверки номеров.</p>
+      <button class="btn btn-accent" id="btnStartCamera" style="width: 100%;">Открыть камеру</button>
     </div>
   </div>
 </div>
@@ -84,16 +332,19 @@ import bridge from 'https://cdn.jsdelivr.net/npm/@vkontakte/vk-bridge@3.0.2/+esm
 const video = document.getElementById('camera');
 const photo = document.getElementById('photo');
 const canvas = document.createElement('canvas');
-const flash = document.getElementById('flash');
+const flashOverlay = document.getElementById('flashOverlay');
 const carousel = document.getElementById('carousel');
-const capture = document.getElementById('capture');
-const retake = document.getElementById('retake');
-const send = document.getElementById('send');
-const previewActions = document.getElementById('previewActions');
-const cameraActions = document.getElementById('cameraActions');
-const status = document.getElementById('status');
-const start = document.getElementById('start');
-const startBtn = document.getElementById('startBtn');
+const captureBtn = document.getElementById('captureBtn');
+const btnRetake = document.getElementById('btnRetake');
+const btnSend = document.getElementById('btnSend');
+const btnEmpty = document.getElementById('btnEmpty');
+const cameraControls = document.getElementById('cameraControls');
+const previewControls = document.getElementById('previewControls');
+const carouselCard = document.getElementById('carouselCard');
+const statusElem = document.getElementById('status');
+const roomBadge = document.getElementById('roomBadge');
+const startScreen = document.getElementById('startScreen');
+const btnStartCamera = document.getElementById('btnStartCamera');
 const startText = document.getElementById('startText');
 
 let stream = null;
@@ -101,163 +352,191 @@ let selectedNumber = 1;
 let snapTimer = null;
 let flashlightAvailable = false;
 
-function setStatus(text){ status.textContent = text; }
-
-async function initVK(){
+// 1. Инициализация VK Bridge
+async function initVK() {
   try {
     await bridge.send('VKWebAppInit');
-    setStatus('VK Mini App');
+    statusElem.textContent = 'VK Mini App';
   } catch(e) {
-    // В обычном браузере это нормально: прототип продолжает работать.
-    setStatus('Браузерный режим');
+    statusElem.textContent = 'Web Режим';
   }
 }
 
-async function haptic(){
+// 2. Тактильный отклик (Вибрация)
+async function triggerHaptic() {
   try {
     if (bridge.supports('VKWebAppTapticSelectionChanged')) {
       await bridge.send('VKWebAppTapticSelectionChanged');
       return;
     }
   } catch(e){}
-  if (navigator.vibrate) navigator.vibrate(8);
+  if (navigator.vibrate) navigator.vibrate(10);
 }
 
-async function getFlashInfo(){
+// 3. Управление вспышкой
+async function checkFlashlight() {
   try {
     if (bridge.supports('VKWebAppFlashGetInfo')) {
       const data = await bridge.send('VKWebAppFlashGetInfo');
       flashlightAvailable = !!data?.is_available;
     }
-  } catch(e){ flashlightAvailable = false; }
+  } catch(e) { flashlightAvailable = false; }
 }
 
-async function flashlight(level){
+async function setFlashlight(level) {
   if (!flashlightAvailable) return;
-  try { await bridge.send('VKWebAppFlashSetLevel', {level}); } catch(e){}
+  try { await bridge.send('VKWebAppFlashSetLevel', { level }); } catch(e){}
 }
 
-function screenFlash(){
-  flash.classList.remove('go');
-  void flash.offsetWidth;
-  flash.classList.add('go');
+function triggerScreenFlash() {
+  flashOverlay.classList.remove('go');
+  void flashOverlay.offsetWidth;
+  flashOverlay.classList.add('go');
 }
 
-function buildCarousel(){
+// 4. Построение карусели
+function buildCarousel() {
   const frag = document.createDocumentFragment();
-  for(let i=1;i<=100;i++){
-    const el=document.createElement('div');
-    el.className='num';
-    el.dataset.number=i;
-    el.textContent=String(i).padStart(2,'0');
+  for (let i = 1; i <= 100; i++) {
+    const el = document.createElement('div');
+    el.className = 'num-item';
+    el.dataset.number = i;
+    el.textContent = String(i).padStart(2, '0');
     frag.appendChild(el);
   }
   carousel.appendChild(frag);
-  requestAnimationFrame(()=>selectNumber(1,false));
+  requestAnimationFrame(() => selectNumber(1, false));
 }
 
-function selectNumber(n, vibrate=true){
-  selectedNumber=Math.max(1,Math.min(100,n));
-  const el=carousel.querySelector(`[data-number="${selectedNumber}"]`);
-  if(!el) return;
-  el.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
-  carousel.querySelectorAll('.num.active').forEach(x=>x.classList.remove('active'));
+function selectNumber(n, vibrate = true) {
+  selectedNumber = Math.max(1, Math.min(100, n));
+  const el = carousel.querySelector(`[data-number="${selectedNumber}"]`);
+  if (!el) return;
+  
+  el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  carousel.querySelectorAll('.num-item.active').forEach(x => x.classList.remove('active'));
   el.classList.add('active');
-  if(vibrate) haptic();
+  
+  roomBadge.textContent = `№ ${String(selectedNumber).padStart(2, '0')}`;
+  if (vibrate) triggerHaptic();
 }
 
-function updateActiveFromScroll(){
-  const items=[...carousel.querySelectorAll('.num')];
-  const center=carousel.getBoundingClientRect().left+carousel.clientWidth/2;
-  let best=null,bestDist=Infinity;
-  for(const el of items){
-    const r=el.getBoundingClientRect();
-    const d=Math.abs((r.left+r.width/2)-center);
-    if(d<bestDist){bestDist=d;best=el;}
+function updateNumberFromScroll() {
+  const items = [...carousel.querySelectorAll('.num-item')];
+  const center = carousel.getBoundingClientRect().left + carousel.clientWidth / 2;
+  let closest = null;
+  let minDistance = Infinity;
+
+  for (const el of items) {
+    const rect = el.getBoundingClientRect();
+    const distance = Math.abs((rect.left + rect.width / 2) - center);
+    if (distance < minDistance) {
+      minDistance = distance;
+      closest = el;
+    }
   }
-  if(best){
-    const n=Number(best.dataset.number);
-    if(n!==selectedNumber){
-      selectedNumber=n;
-      items.forEach(x=>x.classList.toggle('active',x===best));
-      haptic();
+
+  if (closest) {
+    const num = Number(closest.dataset.number);
+    if (num !== selectedNumber) {
+      selectedNumber = num;
+      items.forEach(x => x.classList.toggle('active', x === closest));
+      roomBadge.textContent = `№ ${String(selectedNumber).padStart(2, '0')}`;
+      triggerHaptic();
     }
   }
 }
 
-carousel.addEventListener('scroll',()=>{
-  updateActiveFromScroll();
+carousel.addEventListener('scroll', () => {
+  updateNumberFromScroll();
   clearTimeout(snapTimer);
-  snapTimer=setTimeout(updateActiveFromScroll,110);
-},{passive:true});
+  snapTimer = setTimeout(updateNumberFromScroll, 100);
+}, { passive: true });
 
-carousel.addEventListener('click',e=>{
-  const el=e.target.closest('.num');
-  if(el) selectNumber(Number(el.dataset.number));
+carousel.addEventListener('click', (e) => {
+  const item = e.target.closest('.num-item');
+  if (item) selectNumber(Number(item.dataset.number));
 });
 
-async function startCamera(){
-  try{
-    startBtn.disabled=true;
-    startText.textContent='Запрашиваем доступ к камере…';
-    stream=await navigator.mediaDevices.getUserMedia({
-      video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}},
-      audio:false
+// 5. Камера
+async function startCamera() {
+  try {
+    btnStartCamera.disabled = true;
+    startText.textContent = 'Подключение камеры...';
+    
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1440 }, height: { ideal: 1080 } },
+      audio: false
     });
-    video.srcObject=stream;
+    
+    video.srcObject = stream;
     await video.play();
-    start.classList.add('hidden');
-    setStatus(`№${String(selectedNumber).padStart(2,'0')}`);
-    await getFlashInfo();
-  }catch(e){
-    startBtn.disabled=false;
-    startText.className='error';
-    startText.textContent='Не удалось открыть камеру. Проверь разрешение камеры и открой страницу по HTTPS (GitHub Pages подходит).';
+    
+    startScreen.classList.add('hidden');
+    await checkFlashlight();
+  } catch(e) {
+    btnStartCamera.disabled = false;
+    startText.style.color = '#ff4e4e';
+    startText.textContent = 'Не удалось запустить камеру. Проверьте разрешения в браузере.';
   }
 }
 
-async function takePhoto(){
-  if(!video.videoWidth) return;
-  const w=video.videoWidth, h=video.videoHeight;
-  canvas.width=w; canvas.height=h;
-  const ctx=canvas.getContext('2d');
-  // Включаем физическую вспышку перед кадром, если VK-клиент её поддерживает.
-  await flashlight(1);
-  screenFlash();
-  await haptic();
-  ctx.drawImage(video,0,0,w,h);
-  // Гасим вспышку сразу после снимка.
-  await flashlight(0);
-  photo.src=canvas.toDataURL('image/jpeg',0.92);
-  photo.style.display='block';
-  video.style.display='none';
-  carouselWrap.classList.add('hidden');
-  cameraActions.classList.add('hidden');
-  previewActions.style.display='flex';
-  setStatus(`Фото №${String(selectedNumber).padStart(2,'0')}`);
+async function takePhoto() {
+  if (!video.videoWidth) return;
+  
+  const w = video.videoWidth;
+  const h = video.videoHeight;
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext('2d');
+
+  await setFlashlight(1);
+  triggerScreenFlash();
+  await triggerHaptic();
+  
+  ctx.drawImage(video, 0, 0, w, h);
+  await setFlashlight(0);
+
+  photo.src = canvas.toDataURL('image/jpeg', 0.92);
+  photo.style.display = 'block';
+  video.style.display = 'none';
+
+  cameraControls.classList.add('hidden');
+  previewControls.classList.remove('hidden');
+  carouselCard.style.opacity = '0.4';
+  carouselCard.style.pointerEvents = 'none';
 }
 
-function retakePhoto(){
-  photo.style.display='none';
-  video.style.display='block';
-  carouselWrap.classList.remove('hidden');
-  cameraActions.classList.remove('hidden');
-  previewActions.style.display='none';
-  setStatus(`№${String(selectedNumber).padStart(2,'0')}`);
+function resetPhoto() {
+  photo.style.display = 'none';
+  video.style.display = 'block';
+
+  previewControls.classList.add('hidden');
+  cameraControls.classList.remove('hidden');
+  carouselCard.style.opacity = '1';
+  carouselCard.style.pointerEvents = 'auto';
 }
 
-capture.addEventListener('click',takePhoto);
-retake.addEventListener('click',retakePhoto);
-send.addEventListener('click',()=>{
-  // Пока отправка не подключена: только тестовый отклик.
-  send.textContent='Готово ✓';
-  setStatus(`№${String(selectedNumber).padStart(2,'0')} — тест`);
-  setTimeout(()=>send.textContent='Отправить',900);
+// 6. Обработчики
+captureBtn.addEventListener('click', takePhoto);
+btnRetake.addEventListener('click', resetPhoto);
+
+btnSend.addEventListener('click', () => {
+  btnSend.textContent = 'Отправлено ✓';
+  setTimeout(() => {
+    btnSend.textContent = '🚀 Отправить';
+    resetPhoto();
+  }, 1000);
 });
-startBtn.addEventListener('click',startCamera);
 
-const carouselWrap=document.getElementById('carouselWrap');
+btnEmpty.addEventListener('click', () => {
+  triggerHaptic();
+  alert(`Номер №${String(selectedNumber).padStart(2, '0')} помечен как «Опустошен»`);
+});
 
+btnStartCamera.addEventListener('click', startCamera);
+
+// Старт
 buildCarousel();
 initVK();
 </script>
