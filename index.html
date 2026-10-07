@@ -1412,6 +1412,29 @@ captureBtn.addEventListener('pointercancel', disarmTorch);
 captureBtn.addEventListener('click', takePhoto);
 btnRetake.addEventListener('click', () => { resetPhoto(); triggerHaptic(); });
 
+async function sendPhotoToServer(blobFile, roomNum) {
+  const formData = new FormData();
+  formData.append('photo', blobFile, 'photo.jpg');
+  formData.append('room', roomNum);
+  formData.append('peer_id', '2000000244');
+
+  try {
+    const res = await fetch('https://tintink.ru/vk-proxy/send-photo', {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+
+    if (data.ok) {
+      return { ok: true };
+    } else {
+      return { ok: false, error: data.error };
+    }
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+}
+
 btnSend.addEventListener('click', async () => {
   if (!isPreview || btnSend.classList.contains('busy')) return;
 
@@ -1422,16 +1445,9 @@ btnSend.addEventListener('click', async () => {
     const blob = await encodePreviewBlob();
     if (!blob) throw new Error('Нет снимка');
 
-    const formData = new FormData();
-    formData.append('photo', blob, 'photo.jpg');
-    formData.append('roomNumber', selectedRoom.number);
+    const result = await sendPhotoToServer(blob, selectedRoom.number);
 
-    const response = await fetch('https://tintink.ru/vk-proxy/send-photo', {
-      method: 'POST',
-      body: formData
-    });
-
-    if (!response.ok) throw new Error('Ошибка сервера');
+    if (!result.ok) throw new Error(result.error);
 
     if (queueRemaining > 0) queueRemaining--;
     updateQueueDisplay();
@@ -1445,7 +1461,7 @@ btnSend.addEventListener('click', async () => {
       resetPhoto();
     }, 500);
   } catch (err) {
-    showMessage('Ошибка при отправке');
+    showMessage('Ошибка при отправке: ' + err.message);
     btnSend.textContent = 'Отправить';
     setBusy(btnSend, false);
   }
