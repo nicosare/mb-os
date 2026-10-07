@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>VK Mini App - Фотофиксация</title>
   
-  <!-- Подключение VK Bridge API -->
+  <!-- Подключение VK Bridge -->
   <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/index.umd.js"></script>
 
   <style>
@@ -34,7 +34,6 @@
       position: relative;
     }
 
-    /* Верхний статус-бар */
     .header-bar {
       position: absolute;
       top: 0;
@@ -57,7 +56,6 @@
       font-size: 15px;
     }
 
-    /* Область камеры / превью */
     .viewport {
       flex: 1;
       position: relative;
@@ -74,7 +72,6 @@
       object-fit: cover;
     }
 
-    /* Эффект экранной вспышки */
     .screen-flash {
       position: absolute;
       inset: 0;
@@ -89,7 +86,6 @@
       opacity: 1;
     }
 
-    /* Кнопки поверх камеры */
     .controls-overlay {
       position: absolute;
       bottom: 20px;
@@ -125,11 +121,6 @@
       backdrop-filter: blur(10px);
     }
 
-    .btn-warning {
-      background: #e64646;
-    }
-
-    /* Нижный горизонтальный селектор номеров */
     .picker-container {
       height: 90px;
       background: rgba(18, 18, 18, 0.95);
@@ -184,26 +175,36 @@
       font-size: 22px;
       transform: scale(1.15);
     }
+
+    .camera-fallback {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 20px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
 
   <div class="app-container">
-    <!-- Шапка -->
     <div class="header-bar">
-      <span>VK Mini App Test</span>
-      <div class="active-badge" id="activeBadge">№ 1</div>
+      <span>MiniApp OS</span>
+      <div class="active-badge" id="activeBadge">№ 101</div>
     </div>
 
-    <!-- Вспышка экраном -->
     <div class="screen-flash" id="flashOverlay"></div>
 
-    <!-- Камера / Превью -->
     <div class="viewport">
       <video id="videoElem" autoplay playsinline muted></video>
       <img id="previewImg" style="display: none;" alt="Preview" />
 
-      <!-- Оверлей кнопок управления -->
+      <div class="camera-fallback" id="cameraFallback">
+        <p>Требуется доступ к камере</p>
+        <button class="btn" id="btnStartCameraManual">Включить камеру</button>
+      </div>
+
       <div class="controls-overlay" id="controlsCamera">
         <button class="btn btn-secondary" id="btnEmpty">Опустошен</button>
         <button class="btn" id="btnTakePhoto">📸 Сделать фото</button>
@@ -215,7 +216,6 @@
       </div>
     </div>
 
-    <!-- Барабан номеров -->
     <div class="picker-container">
       <div class="picker-focus-ring"></div>
       <div class="picker-list" id="pickerList"></div>
@@ -223,14 +223,27 @@
   </div>
 
   <script>
-    // 1. Инициализация VK Bridge
-    if (window.vkBridge) {
-      vkBridge.send('VKWebAppInit')
-        .then(() => console.log('VK Bridge успешно инициализирован'))
-        .catch(err => console.error('Ошибка инициализации VK Bridge:', err));
+    // 1. Гарантированный вызов VKWebAppInit
+    function initVKBridge() {
+      const bridge = window.vkBridge || (window.vkBridgeDefault && window.vkBridgeDefault.default);
+      if (bridge && typeof bridge.send === 'function') {
+        bridge.send('VKWebAppInit')
+          .then(() => {
+            console.log('VK Bridge успешно инициализирован');
+            bridge.send('VKWebAppSetViewSettings', {
+              status_bar_style: 'light',
+              action_menu_theme: 'dark'
+            }).catch(() => {});
+          })
+          .catch(err => console.error('Ошибка VKWebAppInit:', err));
+      } else {
+        // Повторная попытка, если скрипт VK Bridge еще не успел загрузиться
+        setTimeout(initVKBridge, 100);
+      }
     }
+    initVKBridge();
 
-    // Тестовый массив номеров
+    // 2. Логика номеров
     const NUMBERS = Array.from({ length: 40 }, (_, i) => 101 + i);
     let activeNumber = NUMBERS[0];
     let mediaStream = null;
@@ -241,11 +254,11 @@
     const pickerList = document.getElementById('pickerList');
     const activeBadge = document.getElementById('activeBadge');
     const flashOverlay = document.getElementById('flashOverlay');
+    const cameraFallback = document.getElementById('cameraFallback');
 
     const controlsCamera = document.getElementById('controlsCamera');
     const controlsPreview = document.getElementById('controlsPreview');
 
-    // 2. Генерация списка номеров в карусели
     function initPicker() {
       NUMBERS.forEach((num, index) => {
         const item = document.createElement('div');
@@ -261,7 +274,6 @@
       pickerList.addEventListener('scroll', handleScroll);
     }
 
-    // Определение центрального элемента при скролле
     function handleScroll() {
       const containerRect = pickerList.getBoundingClientRect();
       const containerCenter = containerRect.left + containerRect.width / 2;
@@ -289,68 +301,72 @@
           Array.from(pickerList.children).forEach(child => child.classList.remove('active'));
           closestItem.classList.add('active');
 
-          // Легкая вибрация при смене номера (VK Bridge)
-          if (window.vkBridge) {
-            vkBridge.send('VKWebAppTapticImpactOccurred', { style: 'light' }).catch(() => {});
+          const bridge = window.vkBridge;
+          if (bridge) {
+            bridge.send('VKWebAppTapticImpactOccurred', { style: 'light' }).catch(() => {});
           }
         }
       }
     }
 
-    // 3. Работа с камерой
+    // 3. Безопасный запуск камеры
     async function startCamera() {
       try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error('MediaDevices API не поддерживается');
+        }
+
         mediaStream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
           audio: false
         });
+
         videoElem.srcObject = mediaStream;
+        videoElem.style.display = 'block';
+        cameraFallback.style.display = 'none';
       } catch (err) {
-        console.error('Ошибка доступа к камере:', err);
-        alert('Не удалось открыть камеру. Проверьте разрешения браузера.');
+        console.warn('Автозапуск камеры не удался:', err);
+        videoElem.style.display = 'none';
+        cameraFallback.style.display = 'flex';
       }
     }
 
-    // 4. Съемка с авто-вспышкой
+    // 4. Съемка
     async function takePhoto() {
-      if (!mediaStream) return;
+      if (!mediaStream) {
+        await startCamera();
+        if (!mediaStream) return;
+      }
 
       const track = mediaStream.getVideoTracks()[0];
       let torchSuccess = false;
 
-      // Пробуем аппаратную вспышку
       try {
         const capabilities = track.getCapabilities ? track.getCapabilities() : {};
         if (capabilities.torch) {
           await track.applyConstraints({ advanced: [{ torch: true }] });
           torchSuccess = true;
         }
-      } catch (e) {
-        console.warn('Аппаратная вспышка недоступна:', e);
-      }
+      } catch (e) {}
 
-      // Если нет аппаратной вспышки — экраном
       if (!torchSuccess) {
         flashOverlay.classList.add('active');
       }
 
       await new Promise(resolve => setTimeout(resolve, 150));
 
-      // Фиксируем кадр через Canvas
       const canvas = document.createElement('canvas');
       canvas.width = videoElem.videoWidth || 1280;
       canvas.height = videoElem.videoHeight || 720;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
 
-      // Отключаем вспышки
       if (torchSuccess) {
         try { await track.applyConstraints({ advanced: [{ torch: false }] }); } catch (e) {}
       } else {
         flashOverlay.classList.remove('active');
       }
 
-      // Переходим в превью
       canvas.toBlob((blob) => {
         capturedBlob = blob;
         previewImg.src = URL.createObjectURL(blob);
@@ -362,7 +378,6 @@
       }, 'image/jpeg', 0.9);
     }
 
-    // Сброс на камеру
     function resetToCamera() {
       capturedBlob = null;
       previewImg.style.display = 'none';
@@ -372,20 +387,20 @@
       controlsCamera.style.display = 'flex';
     }
 
-    // 5. Обработчики кнопок
+    document.getElementById('btnStartCameraManual').addEventListener('click', startCamera);
     document.getElementById('btnTakePhoto').addEventListener('click', takePhoto);
     document.getElementById('btnRetake').addEventListener('click', resetToCamera);
 
     document.getElementById('btnSend').addEventListener('click', () => {
-      alert(`[ТЕСТ] Отправка снимка для номера №${activeNumber} в беседу!`);
+      alert(`[ТЕСТ] Отправка снимка №${activeNumber}`);
       resetToCamera();
     });
 
     document.getElementById('btnEmpty').addEventListener('click', () => {
-      alert(`[ТЕСТ] Номер №${activeNumber} помечен как «Опустошен»!`);
+      alert(`[ТЕСТ] Номер №${activeNumber} — Опустошен`);
     });
 
-    // Старт
+    // Инициализация UI
     initPicker();
     startCamera();
   </script>
